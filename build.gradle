@@ -1,18 +1,17 @@
 plugins {
     // Languages
-    id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.5.21'
+    id "java"
+    id "org.jetbrains.kotlin.jvm" version "1.5.30"
 
     // Minecraft Tools
-    id 'net.minecraftforge.gradle.forge' version '8708bf3e0'
-    id 'org.spongepowered.mixin' version '0.6-SNAPSHOT'
+    id "net.minecraftforge.gradle.forge" version "8708bf3e0"
 
     // Build Tools
-    id 'com.github.johnrengelman.shadow' version '6.1.0'
-    id 'com.github.gmazzo.buildconfig' version '3.0.1'
+    id "com.github.johnrengelman.shadow" version "6.1.0"
+    id "com.github.gmazzo.buildconfig" version "3.0.1"
 }
 
-group 'dev.isxander'
+group "dev.isxander"
 
 def modPackage = "$group.$mod_id"
 def isPrerelease =! mod_version_prerelease.trim().isEmpty()
@@ -27,9 +26,9 @@ version = {
 targetCompatibility = sourceCompatibility = JavaVersion.VERSION_1_8
 
 minecraft {
-    version = '1.8.9-11.15.1.2318-1.8.9'
-    mappings = 'stable_22'
-    runDir = 'run'
+    version = "1.8.9-11.15.1.2318-1.8.9"
+    mappings = "stable_22"
+    runDir = "run"
     makeObfSourceJar = false
 }
 
@@ -38,23 +37,22 @@ buildConfig {
     packageName modPackage
     useKotlinOutput()
 
-    buildConfigField 'String', 'NAME', "\"$mod_name\""
-    buildConfigField 'String', 'ID', "\"$mod_id\""
-    buildConfigField 'String', 'DESCRIPTION', "\"$mod_description\""
+    buildConfigField "String", "NAME", "\"$mod_name\""
+    buildConfigField "String", "ID", "\"$mod_id\""
+    buildConfigField "String", "DESCRIPTION", "\"$mod_description\""
 
-    buildConfigField 'Int', 'VERSION_MAJOR', mod_version_major
-    buildConfigField 'Int', 'VERSION_MINOR', mod_version_minor
-    buildConfigField 'Int', 'VERSION_PATCH', mod_version_patch
-    buildConfigField 'Int?', 'VERSION_PRERELEASE', (isPrerelease ? mod_version_prerelease : 'null')
+    buildConfigField "Int", "VERSION_MAJOR", mod_version_major
+    buildConfigField "Int", "VERSION_MINOR", mod_version_minor
+    buildConfigField "Int", "VERSION_PATCH", mod_version_patch
+    buildConfigField "Int?", "VERSION_PRERELEASE", (isPrerelease ? mod_version_prerelease : "null")
 
-    buildConfigField 'String', 'VERSION_FULL', "\"${project.version}\""
+    buildConfigField "String", "VERSION_FULL", "\"${project.version}\""
 }
 
 repositories {
     mavenCentral()
-    maven { url 'https://repo.spongepowered.org/maven' }
-    maven { url 'https://jitpack.io' }
-    maven { url 'https://repo.sk1er.club/repository/maven-public' }
+    maven { url "https://jitpack.io" }
+    maven { url "https://repo.sk1er.club/repository/maven-public" }
 }
 
 configurations {
@@ -63,32 +61,27 @@ configurations {
 }
 
 dependencies {
-    // Essential
-    include 'gg.essential:loader-launchwrapper:1.0.2'
-    provided 'gg.essential:essential-1.8.9-forge:1234'
-
-    include 'dev.isXander.kotlin-forge-api:forge-event-dsl:481f620'
-    annotationProcessor 'org.spongepowered:mixin:0.7.11-SNAPSHOT'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+    include "gg.essential:loader-launchwrapper:1.1.1"
+    provided "gg.essential:essential-1.8.9-forge:1320"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
 }
 
 jar {
     manifest.attributes (
-            'MixinConfigs': 'mixins.examplemod.json',
-            'TweakClass': 'gg.essential.loader.stage0.EssentialSetupTweaker'
+            "TweakClass": "gg.essential.loader.stage0.EssentialSetupTweaker"
     )
 
     enabled = false
 }
 
 tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
+    options.encoding = "UTF-8"
 }
 
 compileKotlin {
     kotlinOptions {
-        jvmTarget = '1.8'
-        freeCompilerArgs += '-Xopt-in=kotlin.RequiresOptIn'
+        jvmTarget = "1.8"
+        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
     }
 }
 
@@ -98,16 +91,14 @@ processResources {
     inputs.property 'mod_name', mod_name
     inputs.property 'mod_description', mod_description
 
-    filesMatching('mcmod.info') {
+    filesMatching("mcmod.info") {
         expand (
-                'mod_version': project.version,
-                'mod_id': mod_id,
-                'mod_name': mod_name,
-                'mod_description': mod_description
+                "mod_version": project.version,
+                "mod_id": mod_id,
+                "mod_name": mod_name,
+                "mod_description": mod_description
         )
     }
-
-    rename '(.+_at.cfg)', 'META-INF/$1'
 }
 
 task moveResources {
@@ -123,28 +114,16 @@ tasks.moveResources.dependsOn processResources
 tasks.classes.dependsOn moveResources
 
 shadowJar {
-    archiveClassifier.set('')
+    archiveClassifier.set("")
 
     configurations = [project.configurations.include]
     duplicatesStrategy DuplicatesStrategy.EXCLUDE
 }
 
-mixin {
-    disableRefMapWarning true
-    defaultObfuscationEnv searge
-    add sourceSets.main, 'mixins.examplemod.refmap.json'
-}
-
 reobf {
     shadowJar {
-        mappingType = 'SEARGE'
+        mappingType = "SEARGE"
     }
 }
 
 reobfJar.dependsOn tasks.shadowJar
-
-sourceSets {
-    main {
-        ext.refMap = 'mixins.examplemod.refmap.json'
-    }
-}

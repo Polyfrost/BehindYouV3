@@ -1,9 +1,0 @@
-{
-  "compatibilityLevel": "JAVA_8",
-  "minVersion": "0.7",
-  "package": "dev.isxander.examplemod.mixins",
-  "refmap": "mixins.examplemod.refmap.json",
-  "mixins": [
-
-  ]
-}
