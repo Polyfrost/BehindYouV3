@@ -48,7 +48,11 @@ object Updater {
             if (updateUrl.isNotEmpty()) {
                 if (BehindYouConfig.showUpdateNotification) {
                     EssentialAPI.getNotifications()
-                        .push("Mod Update", "${BehindYou.NAME} $latestTag is available!\nClick here to download it!", 5f) {
+                        .push(
+                            "Mod Update",
+                            "${BehindYou.NAME} $latestTag is available!\nClick here to download it!",
+                            5f
+                        ) {
                             EssentialAPI.getGuiUtil().openScreen(DownloadConfirmGui(mc.currentScreen))
                         }
                 }

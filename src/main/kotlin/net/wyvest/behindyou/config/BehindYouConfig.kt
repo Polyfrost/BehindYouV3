@@ -23,6 +23,23 @@ object BehindYouConfig : Vigilant(File(BehindYou.modDir, "${BehindYou.ID}.toml")
 
     @Property(
         type = PropertyType.SWITCH,
+        name = "Hold Keybind",
+        description = "Allow the option to turn back to the first person after releasing the keybind.",
+        category = "General"
+    )
+    var hold = true
+
+    @Property(
+        type = PropertyType.PARAGRAPH,
+        name = "Keybind",
+        description = "The ability to edit the keybind is in the Minecraft Controls Menu, in options -> controls.",
+        category = "General",
+        protectedText = true
+    )
+    var placeholder = ""
+
+    @Property(
+        type = PropertyType.SWITCH,
         name = "Show Update Notification",
         description = "Show a notification when you start Minecraft informing you of new updates.",
         category = "General"
