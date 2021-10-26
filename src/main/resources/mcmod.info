@@ -1,14 +1,14 @@
 [
   {
     "modid": "behindyouv2",
-    "name": "BehindYouv2",
+    "name": "BehindYouV2",
     "description": "Remove the back 3rd perspective view.",
     "version": "${version}",
     "mcversion": "${mcversion}",
     "url": "",
     "updateUrl": "",
     "authorList": [
-      "W-OVERFLOW"
+      "Qalcyo"
     ],
     "credits": "",
     "logoFile": "",
