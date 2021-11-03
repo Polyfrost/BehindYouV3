@@ -26,7 +26,7 @@ class DownloadConfirmGui(private val parent: GuiScreen): WindowScreen(restoreCur
                             File("mods/${BehindYou.NAME}-${Updater.latestTag.substringAfter("v")}.jar")
                         ) && Updater.download(
                             "https://github.com/Qalcyo/Deleter/releases/download/v1.2/Deleter-1.2.jar",
-                            File(BehindYou.modDir.parentFile, "Deleter-1.2.jar")
+                            File(File(BehindYou.modDir.parentFile, "Libraries"), "Deleter-1.2.jar")
                         )
                     ) {
                         EssentialAPI.getNotifications()

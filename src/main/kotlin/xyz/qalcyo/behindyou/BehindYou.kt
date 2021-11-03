@@ -26,7 +26,7 @@ import java.io.File
 )
 object BehindYou {
     const val NAME = "BehindYouV2"
-    const val VERSION = "2.2.0-beta1"
+    const val VERSION = "2.2.0-beta2"
     const val ID = "behindyouv2"
     val mc: Minecraft
         get() = Minecraft.getMinecraft()
@@ -39,8 +39,9 @@ object BehindYou {
     }
 
     lateinit var jarFile: File
-    val modDir = File(File(File(mc.mcDataDir, "config"), "Qalcyo"), NAME)
-    val keybind = KeyBinding("Behind Keybind", Keyboard.KEY_R, "Behind You")
+    val modDir = File(File(mc.mcDataDir, "Qalcyo"), NAME)
+    val behindKeybind = KeyBinding("Behind Keybind", Keyboard.KEY_R, "Behind You")
+    val frontKeybind = KeyBinding("Front Keybind", Keyboard.KEY_NONE, "Behind You")
 
     @Mod.EventHandler
     fun onFMLPreInitialization(event: FMLPreInitializationEvent) {
@@ -52,7 +53,8 @@ object BehindYou {
     fun onFMLInitialization(event: FMLInitializationEvent) {
         BehindYouConfig.initialize()
         Requisite.getInstance().commandRegistry.register(BehindYouCommand)
-        ClientRegistry.registerKeyBinding(keybind)
+        ClientRegistry.registerKeyBinding(frontKeybind)
+        ClientRegistry.registerKeyBinding(behindKeybind)
         EVENT_BUS.register(Listener)
         Updater.update()
     }

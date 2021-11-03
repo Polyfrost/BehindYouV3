@@ -23,11 +23,19 @@ object BehindYouConfig : Vigilant(File(BehindYou.modDir, "${BehindYou.ID}.toml")
 
     @Property(
         type = PropertyType.SWITCH,
-        name = "Hold Keybind",
-        description = "Allow the option to turn back to the first person after releasing the keybind.",
+        name = "Hold Keybind for Third Person Back",
+        description = "Allow the option to turn back to the first person after releasing the behind keybind.",
         category = "General"
     )
-    var hold = true
+    var holdBack = true
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Hold Keybind for Third Person Front",
+        description = "Allow the option to turn back to the first person after releasing the front keybind.",
+        category = "General"
+    )
+    var holdFront = true
 
     @Property(
         type = PropertyType.SWITCH,
@@ -39,13 +47,23 @@ object BehindYouConfig : Vigilant(File(BehindYou.modDir, "${BehindYou.ID}.toml")
 
     @Property(
         type = PropertyType.NUMBER,
-        name = "Change FOV",
-        description = "Set the FOV when clicking on the BehindYou keybind.",
+        name = "Change FOV For Backview Keybind",
+        description = "Set the FOV when clicking on the behind keybind.",
         category = "General",
         min = 30,
         max = 130
     )
-    var fovNumber = 100
+    var backFOV = 100
+
+    @Property(
+        type = PropertyType.NUMBER,
+        name = "Change FOV For Frontview Keybind",
+        description = "Set the FOV when clicking on the front keybind.",
+        category = "General",
+        min = 30,
+        max = 130
+    )
+    var frontFOV = 100
 
     @Property(
         type = PropertyType.PARAGRAPH,
