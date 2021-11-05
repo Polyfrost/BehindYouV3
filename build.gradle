@@ -42,7 +42,7 @@ dependencies {
         transitive = false
     }
     implementation('xyz.qalcyo.requisite:Requisite-1.8.9:2.0-beta6')
-    include('xyz.qalcyo.requisite:RequisiteInstaller-1.8.9:1.3.9') {
+    include('xyz.qalcyo.requisite:RequisiteInstaller-1.8.9:1.3.10') {
         transitive = false
     }
     include ("com.github.Qalcyo:RequisiteEssentialLoader:39dee241bb") {
