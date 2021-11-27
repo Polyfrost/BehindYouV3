@@ -1,7 +1,7 @@
 plugins {
     id "java"
     id "com.github.johnrengelman.shadow" version "6.1.0"
-    id "net.minecraftforge.gradle.forge" version "86b2392"
+    id "net.minecraftforge.gradle.forge" version "ddb1eb0"
     id "org.jetbrains.kotlin.jvm" version "1.5.31"
 }
 
