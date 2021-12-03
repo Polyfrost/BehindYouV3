@@ -1,15 +1,17 @@
 package xyz.qalcyo.behindyou.commands
 
+import gg.essential.api.EssentialAPI
+import gg.essential.api.commands.Command
+import gg.essential.api.commands.DefaultHandler
 import xyz.qalcyo.behindyou.BehindYou
 import xyz.qalcyo.behindyou.config.BehindYouConfig
-import xyz.qalcyo.requisite.Requisite
-import xyz.qalcyo.requisite.core.commands.annotations.Command
 
-@Command(name = BehindYou.ID, aliases = ["behindyou"], generateTabCompletions = true)
-object BehindYouCommand {
+object BehindYouCommand : Command(BehindYou.ID) {
 
-    @Command.Default
+    override val commandAliases: Set<Alias> = setOf(Alias("behindyou"))
+
+    @DefaultHandler
     fun handle() {
-        Requisite.getInstance().guiHelper.open(BehindYouConfig.gui())
+        EssentialAPI.getGuiUtil().openScreen(BehindYouConfig.gui())
     }
 }

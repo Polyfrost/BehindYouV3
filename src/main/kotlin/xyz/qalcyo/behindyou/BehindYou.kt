@@ -14,7 +14,6 @@ import xyz.qalcyo.behindyou.commands.BehindYouCommand
 import xyz.qalcyo.behindyou.config.BehindYouConfig
 import xyz.qalcyo.behindyou.utils.Updater
 import org.lwjgl.input.Keyboard
-import xyz.qalcyo.requisite.Requisite
 import java.io.File
 
 
@@ -52,7 +51,7 @@ object BehindYou {
     @Mod.EventHandler
     fun onFMLInitialization(event: FMLInitializationEvent) {
         BehindYouConfig.initialize()
-        Requisite.getInstance().commandRegistry.register(BehindYouCommand)
+        BehindYouCommand.register()
         ClientRegistry.registerKeyBinding(frontKeybind)
         ClientRegistry.registerKeyBinding(behindKeybind)
         EVENT_BUS.register(Listener)

@@ -1,13 +1,13 @@
 package xyz.qalcyo.behindyou.utils
 
 import gg.essential.api.EssentialAPI
-import xyz.qalcyo.behindyou.BehindYou
+import gg.essential.api.utils.Multithreading
 import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClientBuilder
-import xyz.qalcyo.mango.Multithreading
+import xyz.qalcyo.behindyou.BehindYou
 import java.awt.Desktop
 import java.io.File
 import java.io.FileOutputStream
