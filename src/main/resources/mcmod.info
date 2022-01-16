@@ -5,10 +5,10 @@
     "description": "${mod_description}",
     "version": "${mod_version}",
     "mcversion": "1.8.9",
-    "url": "https://github.com/isXander/BehindYou",
+    "url": "https://github.com/W-OVERFLOW/BehindYouV3",
     "updateUrl": "",
-    "authorList": ["isXander"],
-    "credits": "isXander for the project template.",
+    "authorList": ["W-OVERFLOW (isXander)"],
+    "credits": "",
     "logoFile": "",
     "screenshots": [],
     "dependencies": []
