@@ -16,14 +16,18 @@ import org.lwjgl.input.Keyboard
 import java.io.File
 
 @Mod(
-    modid = "behindyouv3",
-    name = "BehindYouV3",
-    version = "3.0.0",
+    modid = BehindYou.MODID,
+    name = BehindYou.NAME,
+    version = BehindYou.VERSION,
     acceptedMinecraftVersions = "[1.8.9]",
     clientSideOnly = true,
     modLanguageAdapter = "gg.essential.api.utils.KotlinAdapter"
 )
 object BehindYou {
+    const val MODID = "@ID@"
+    const val NAME = "@NAME@"
+    const val VERSION = "@VER@"
+
     var toggled = false
     var held = false
     var previousPerspective = mc.gameSettings.thirdPersonView
@@ -67,6 +71,7 @@ object BehindYou {
 
         if (mc.gameSettings.keyBindTogglePerspective.isPressed) toggled = false
 
+        val perspective = mc.gameSettings.thirdPersonView
         if (held || toggled) {
             mc.gameSettings.thirdPersonView = 2
             if (Config.changeFOV) {
@@ -75,6 +80,14 @@ object BehindYou {
         } else {
             mc.gameSettings.thirdPersonView = previousPerspective
             mc.gameSettings.fovSetting = previousFOV
+        }
+        if (perspective != mc.gameSettings.thirdPersonView) {
+            if (mc.gameSettings.thirdPersonView == 0) {
+                mc.entityRenderer.loadEntityShader(mc.renderViewEntity)
+            } else if (mc.gameSettings.thirdPersonView == 1) {
+                mc.entityRenderer.loadEntityShader(null)
+            }
+            mc.renderGlobal.setDisplayListEntitiesDirty()
         }
     }
 

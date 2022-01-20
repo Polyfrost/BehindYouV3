@@ -15,7 +15,7 @@ class DownloadGui : WindowScreen(version = ElementaVersion.V1, true, true, true,
         EssentialAPI.getEssentialComponentFactory().buildConfirmationModal {
             this.text = "Are you sure you want to update?"
             this.secondaryText =
-                "(This will update from v3.0.0 to ${Updater.latestTag})"
+                "(This will update from v${BehindYou.VERSION} to ${Updater.latestTag})"
             this.onConfirm = {
                 restorePreviousScreen()
                 Multithreading.runAsync {

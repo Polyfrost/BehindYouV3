@@ -24,7 +24,7 @@ object Updater {
                     fetchJSON("https://api.github.com/repos/W-OVERFLOW/BehindYouV3/releases/latest").getObject()
                 latestTag = latestRelease["tag_name"].asString
                 val currentVersion =
-                    DefaultArtifactVersion("3.0.0")
+                    DefaultArtifactVersion(BehindYou.VERSION)
                 val latestVersion = DefaultArtifactVersion(latestTag!!.substringAfter("v").substringBefore("-"))
                 if (currentVersion >= latestVersion) {
                     return@runAsync
@@ -54,7 +54,7 @@ object Updater {
         if (file.exists()) return true
         url = url.replace(" ", "%20")
         try {
-            downloadToFile(url, file, "BehindYouV3/3.0.0")
+            downloadToFile(url, file, "BehindYouV3/${BehindYou.VERSION}")
         } catch (e: Exception) {
             e.printStackTrace()
             return false

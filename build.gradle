@@ -8,9 +8,17 @@ plugins {
 
     // Build Tools
     id "com.github.johnrengelman.shadow" version "6.1.0"
+    id "net.kyori.blossom" version "1.3.0"
 }
 
-version = "3.0.0"
+version = mod_version
+
+blossom {
+    String className = "src/main/kotlin/dev/isxander/behindyou/BehindYou.kt"
+    replaceToken("@VER@", mod_version, className)
+    replaceToken("@NAME@", mod_name, className)
+    replaceToken("@ID@", mod_id, className)
+}
 
 group "dev.isxander"
 
@@ -62,17 +70,23 @@ compileKotlin {
 }
 
 processResources {
-    inputs.property 'mod_version', project.version
+    inputs.property 'mod_version', mod_version
     inputs.property 'mod_id', mod_id
     inputs.property 'mod_name', mod_name
     inputs.property 'mod_description', mod_description
 
     filesMatching("mcmod.info") {
         expand (
-                "mod_version": project.version,
+                "mod_version": mod_version,
                 "mod_id": mod_id,
                 "mod_name": mod_name,
                 "mod_description": mod_description
+        )
+    }
+    filesMatching("bundle.project.json") {
+        expand (
+                "mod_version": mod_version,
+                "mod_id": mod_id
         )
     }
 }
