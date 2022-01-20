@@ -9,8 +9,16 @@ import gg.essential.vigilance.data.Property
 import gg.essential.vigilance.data.PropertyType
 import java.io.File
 
-@Suppress("unused")
 object Config : Vigilant(File(BehindYou.modDir, "behindyouv3.toml"), "BehindYouV3") {
+
+    @Property(
+        type = PropertyType.SELECTOR,
+        name = "Keybind Handle Mode",
+        description = "Set how the keybind is turned on.",
+        category = "General",
+        options = ["Hold", "Toggle"]
+    )
+    var keybindMode = 0
 
     @Property(
         type = PropertyType.SWITCH,
@@ -29,6 +37,16 @@ object Config : Vigilant(File(BehindYou.modDir, "behindyouv3.toml"), "BehindYouV
         max = 130
     )
     var backFOV = 100
+
+    @Property(
+        type = PropertyType.NUMBER,
+        name = "Change FOV For Frontview Keybind",
+        description = "Set the FOV when clicking on the front keybind.",
+        category = "General",
+        min = 30,
+        max = 130
+    )
+    var frontFOV = 100
 
     @Property(
         type = PropertyType.SWITCH,

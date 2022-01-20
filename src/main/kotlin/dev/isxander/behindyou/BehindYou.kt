@@ -3,9 +3,12 @@ package dev.isxander.behindyou
 import dev.isxander.behindyou.commands.BehindYouCommand
 import dev.isxander.behindyou.config.Config
 import dev.isxander.behindyou.updater.Updater
+import gg.essential.api.EssentialAPI
 import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
+import net.minecraftforge.client.event.GuiOpenEvent
 import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
@@ -14,6 +17,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import org.lwjgl.input.Keyboard
 import java.io.File
+
 
 @Mod(
     modid = BehindYou.MODID,
@@ -28,13 +32,16 @@ object BehindYou {
     const val NAME = "@NAME@"
     const val VERSION = "@VER@"
 
-    var toggled = false
-    var held = false
     var previousPerspective = mc.gameSettings.thirdPersonView
     var previousFOV = mc.gameSettings.fovSetting
 
-    val holdKeybind = KeyBinding("BehindYou (Hold)", Keyboard.KEY_G, "BehindYouV3")
-    val toggleKeybind = KeyBinding("BehindYou (Toggle)", Keyboard.KEY_NONE, "BehindYouV3")
+    val backKeybind = KeyBinding("BehindYou (Back)", Keyboard.KEY_NONE, "BehindYouV3")
+    var previousBackKey = false
+    var backToggled = false
+
+    val frontKeybind = KeyBinding("BehindYou (Front)", Keyboard.KEY_NONE, "BehindYouV3")
+    var previousFrontKey = false
+    var frontToggled = false
 
     lateinit var jarFile: File
     val modDir = File(File(mc.mcDataDir, "W-OVERFLOW"), "BehindYouV3")
@@ -47,47 +54,110 @@ object BehindYou {
 
     @Mod.EventHandler
     fun onFMLInit(event: FMLInitializationEvent) {
-        ClientRegistry.registerKeyBinding(holdKeybind)
-        ClientRegistry.registerKeyBinding(toggleKeybind)
+        ClientRegistry.registerKeyBinding(backKeybind)
+        ClientRegistry.registerKeyBinding(frontKeybind)
 
         MinecraftForge.EVENT_BUS.register(this)
 
         BehindYouCommand.register()
         Updater.update()
+
+        EssentialAPI.getShutdownHookUtil().register {
+            mc.gameSettings.fovSetting = previousFOV
+            mc.gameSettings.saveOptions()
+        }
     }
 
     @SubscribeEvent
-    fun clientTick(event: TickEvent.ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.END) return
+    fun clientTick(event: TickEvent.RenderTickEvent) {
+        if (event.phase != TickEvent.Phase.END || mc.currentScreen != null || mc.theWorld == null || mc.thePlayer == null) return
 
-        if (!toggled && !held) {
-            previousPerspective = mc.gameSettings.thirdPersonView
-            previousFOV = mc.gameSettings.fovSetting
-        }
+        val backDown = backKeybind.isKeyDown
+        val frontDown = frontKeybind.isKeyDown
 
-        if (!held && holdKeybind.isKeyDown) toggled = false
-        held = holdKeybind.isKeyDown
-        if (toggleKeybind.isPressed) toggled = !toggled
+        if (backDown && frontDown) return
 
-        if (mc.gameSettings.keyBindTogglePerspective.isPressed) toggled = false
+        if (backDown != previousBackKey) {
+            previousBackKey = backDown
 
-        val perspective = mc.gameSettings.thirdPersonView
-        if (held || toggled) {
-            mc.gameSettings.thirdPersonView = 2
-            if (Config.changeFOV) {
-                mc.gameSettings.fovSetting = Config.backFOV.toFloat()
+            if (backDown) {
+                if (backToggled) {
+                    resetBack()
+                } else {
+                    enterBack()
+                }
+            } else if (Config.keybindMode == 0) {
+                resetBack()
             }
-        } else {
-            mc.gameSettings.thirdPersonView = previousPerspective
-            mc.gameSettings.fovSetting = previousFOV
-        }
-        if (perspective != mc.gameSettings.thirdPersonView) {
-            if (mc.gameSettings.thirdPersonView == 0) {
-                mc.entityRenderer.loadEntityShader(mc.renderViewEntity)
-            } else if (mc.gameSettings.thirdPersonView == 1) {
-                mc.entityRenderer.loadEntityShader(null)
-            }
+
             mc.renderGlobal.setDisplayListEntitiesDirty()
+        } else if (frontDown != previousFrontKey) {
+            previousFrontKey = frontDown
+
+            if (frontDown) {
+                if (frontToggled) {
+                    resetFront()
+                } else {
+                    enterFront()
+                }
+            } else if (Config.keybindMode == 0) {
+                resetFront()
+            }
+
+            mc.renderGlobal.setDisplayListEntitiesDirty()
+        }
+    }
+
+    @SubscribeEvent
+    fun guiOpen(event: GuiOpenEvent) {
+        if (event.gui != null && Config.keybindMode == 0) {
+            resetAll()
+        }
+    }
+
+    @SubscribeEvent
+    fun onWorldLoad(event: WorldEvent.Load) {
+        resetAll()
+    }
+
+    fun enterBack() {
+        backToggled = true
+        previousPerspective = mc.gameSettings.thirdPersonView
+        previousFOV = mc.gameSettings.fovSetting
+        mc.gameSettings.thirdPersonView = 2
+        if (Config.changeFOV) {
+            mc.gameSettings.fovSetting = Config.backFOV.toFloat()
+        }
+    }
+
+    fun enterFront() {
+        frontToggled = true
+        previousPerspective = mc.gameSettings.thirdPersonView
+        previousFOV = mc.gameSettings.fovSetting
+        mc.gameSettings.thirdPersonView = 1
+        if (Config.changeFOV) {
+            mc.gameSettings.fovSetting = Config.frontFOV.toFloat()
+        }
+    }
+
+    fun resetBack() {
+        backToggled = false
+        mc.gameSettings.thirdPersonView = previousPerspective
+        mc.gameSettings.fovSetting = previousFOV
+    }
+
+    fun resetFront() {
+        frontToggled = false
+        mc.gameSettings.thirdPersonView = previousPerspective
+        mc.gameSettings.fovSetting = previousFOV
+    }
+
+    fun resetAll() {
+        if (frontToggled) {
+            resetFront()
+        }
+        if (backToggled) {
+            resetBack()
         }
     }
 
