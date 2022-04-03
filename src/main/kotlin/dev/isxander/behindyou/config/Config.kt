@@ -1,15 +1,39 @@
 package dev.isxander.behindyou.config
 
 import dev.isxander.behindyou.BehindYou
-import dev.isxander.behindyou.updater.DownloadGui
-import dev.isxander.behindyou.updater.Updater
-import gg.essential.api.EssentialAPI
 import gg.essential.vigilance.Vigilant
 import gg.essential.vigilance.data.Property
+import gg.essential.vigilance.data.PropertyData
 import gg.essential.vigilance.data.PropertyType
+import gg.essential.vigilance.data.SortingBehavior
 import java.io.File
 
-object Config : Vigilant(File(BehindYou.modDir, "behindyouv3.toml"), "BehindYouV3") {
+object Config : Vigilant(File(BehindYou.modDir, "behindyouv3.toml"), "BehindYouV3", sortingBehavior = object : SortingBehavior() {
+    override fun getPropertyComparator(): Comparator<in PropertyData> = Comparator { o1, o2 ->
+        if (o1.attributesExt.name == "!!Keybind!!") return@Comparator -1
+        if (o2.attributesExt.name == "!!Keybind!!") return@Comparator 1
+        else return@Comparator compareValuesBy(o1, o2) {
+            it.attributesExt.subcategory
+        }
+    }
+}) {
+
+    @Property(
+        type = PropertyType.BUTTON,
+        name = "!!Keybind!!",
+        description = "§l§o§nThe ability to edit the keybind is in the Minecraft Controls Menu.\n" +
+                "§rYou can find the Minecraft controls menu in Options -> Controls.",
+        category = "General",
+        placeholder = "Hide on restart"
+    )
+    fun warning() {
+        disableWarning = true
+        markDirty()
+        writeData()
+    }
+
+    @Property(type = PropertyType.SWITCH, name = "Disable Keybind Warning", category = "General", hidden = true)
+    var disableWarning = false
 
     @Property(
         type = PropertyType.SELECTOR,
@@ -48,27 +72,8 @@ object Config : Vigilant(File(BehindYou.modDir, "behindyouv3.toml"), "BehindYouV
     )
     var frontFOV = 100
 
-    @Property(
-        type = PropertyType.SWITCH,
-        name = "Show Update Notification",
-        description = "Show a notification when you start Minecraft informing you of new updates.",
-        category = "Updater"
-    )
-    var showUpdateNotification = true
-
-    @Property(
-        type = PropertyType.BUTTON,
-        name = "Update Now",
-        description = "Update BehindYouV3 by clicking the button.",
-        category = "Updater"
-    )
-    fun update() {
-        if (Updater.shouldUpdate) EssentialAPI.getGuiUtil()
-            .openScreen(DownloadGui()) else EssentialAPI.getNotifications()
-            .push("BehindYouV3", "No update had been detected at startup, and thus the update GUI has not been shown.")
-    }
-
     init {
         initialize()
+        hidePropertyIf("warning") { disableWarning }
     }
 }

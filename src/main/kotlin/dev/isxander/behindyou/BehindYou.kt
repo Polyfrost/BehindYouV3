@@ -1,10 +1,11 @@
 package dev.isxander.behindyou
 
-import dev.isxander.behindyou.commands.BehindYouCommand
+import cc.woverflow.onecore.utils.Updater
+import cc.woverflow.onecore.utils.command
+import cc.woverflow.onecore.utils.openScreen
 import dev.isxander.behindyou.config.Config
-import dev.isxander.behindyou.updater.Updater
-import gg.essential.api.EssentialAPI
-import net.minecraft.client.Minecraft
+import gg.essential.universal.UMinecraft
+import gg.essential.universal.utils.MCMinecraft
 import net.minecraft.client.settings.KeyBinding
 import net.minecraftforge.client.event.GuiOpenEvent
 import net.minecraftforge.common.MinecraftForge
@@ -32,8 +33,8 @@ object BehindYou {
     const val NAME = "@NAME@"
     const val VERSION = "@VER@"
 
-    var previousPerspective = mc.gameSettings.thirdPersonView
-    var previousFOV = mc.gameSettings.fovSetting
+    var previousPerspective = UMinecraft.getSettings().thirdPersonView
+    var previousFOV = UMinecraft.getSettings().fovSetting
 
     val backKeybind = KeyBinding("BehindYou (Back)", Keyboard.KEY_NONE, "BehindYouV3")
     var previousBackKey = false
@@ -43,13 +44,12 @@ object BehindYou {
     var previousFrontKey = false
     var frontToggled = false
 
-    lateinit var jarFile: File
     val modDir = File(File(mc.mcDataDir, "W-OVERFLOW"), "BehindYouV3")
 
     @Mod.EventHandler
     private fun onFMLPreInitialization(event: FMLPreInitializationEvent) {
         if (!modDir.exists()) modDir.mkdirs()
-        jarFile = event.sourceFile
+        Updater.addToUpdater(event.sourceFile, NAME, MODID, VERSION, "W-OVERFLOW/$MODID")
     }
 
     @Mod.EventHandler
@@ -59,12 +59,10 @@ object BehindYou {
 
         MinecraftForge.EVENT_BUS.register(this)
 
-        BehindYouCommand.register()
-        Updater.update()
-
-        EssentialAPI.getShutdownHookUtil().register {
-            mc.gameSettings.fovSetting = previousFOV
-            mc.gameSettings.saveOptions()
+        command("behindyou", aliases = arrayListOf("behindyouv3")) {
+            main {
+                Config.openScreen()
+            }
         }
     }
 
@@ -84,6 +82,9 @@ object BehindYou {
                 if (backToggled) {
                     resetBack()
                 } else {
+                    if (frontToggled) {
+                        resetFront()
+                    }
                     enterBack()
                 }
             } else if (Config.keybindMode == 0) {
@@ -98,6 +99,9 @@ object BehindYou {
                 if (frontToggled) {
                     resetFront()
                 } else {
+                    if (backToggled) {
+                        resetBack()
+                    }
                     enterFront()
                 }
             } else if (Config.keybindMode == 0) {
@@ -122,34 +126,34 @@ object BehindYou {
 
     fun enterBack() {
         backToggled = true
-        previousPerspective = mc.gameSettings.thirdPersonView
-        previousFOV = mc.gameSettings.fovSetting
-        mc.gameSettings.thirdPersonView = 2
+        previousPerspective = UMinecraft.getSettings().thirdPersonView
+        previousFOV = UMinecraft.getSettings().fovSetting
+        UMinecraft.getSettings().thirdPersonView = 2
         if (Config.changeFOV) {
-            mc.gameSettings.fovSetting = Config.backFOV.toFloat()
+            UMinecraft.getSettings().fovSetting = Config.backFOV.toFloat()
         }
     }
 
     fun enterFront() {
         frontToggled = true
-        previousPerspective = mc.gameSettings.thirdPersonView
-        previousFOV = mc.gameSettings.fovSetting
-        mc.gameSettings.thirdPersonView = 1
+        previousPerspective = UMinecraft.getSettings().thirdPersonView
+        previousFOV = UMinecraft.getSettings().fovSetting
+        UMinecraft.getSettings().thirdPersonView = 1
         if (Config.changeFOV) {
-            mc.gameSettings.fovSetting = Config.frontFOV.toFloat()
+            UMinecraft.getSettings().fovSetting = Config.frontFOV.toFloat()
         }
     }
 
     fun resetBack() {
         backToggled = false
-        mc.gameSettings.thirdPersonView = previousPerspective
-        mc.gameSettings.fovSetting = previousFOV
+        UMinecraft.getSettings().thirdPersonView = previousPerspective
+        UMinecraft.getSettings().fovSetting = previousFOV
     }
 
     fun resetFront() {
         frontToggled = false
-        mc.gameSettings.thirdPersonView = previousPerspective
-        mc.gameSettings.fovSetting = previousFOV
+        UMinecraft.getSettings().thirdPersonView = previousPerspective
+        UMinecraft.getSettings().fovSetting = previousFOV
     }
 
     fun resetAll() {
@@ -163,5 +167,5 @@ object BehindYou {
 
 }
 
-val mc: Minecraft
-    get() = Minecraft.getMinecraft()
+val mc: MCMinecraft
+    get() = UMinecraft.getMinecraft()
