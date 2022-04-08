@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}",
+  "name": "${name}",
+  "version": "${version}",
+  "description": "Look behind you with ease!",
+  "authors": [
+    "W-OVERFLOW"
+  ],
+  "contact": {
+    "homepage": "https://github.com/W-OVERFLOW/BehindYouV3",
+    "sources": "https://github.com/W-OVERFLOW/BehindYouV3",
+    "issues": "https://github.com/W-OVERFLOW/BehindYouV3/issues"
+  },
+  "entrypoints": {
+    "client": [
+      {
+        "adapter": "kotlin",
+        "value": "dev.isxander.behindyou.BehindYou::onInit"
+      }
+    ]
+  },
+  "license": "LGPL-3.0",
+  "environment": "client",
+  "depends": {
+    "onecore": "*",
+    "minecraft": "${mcVersionStr}",
+    "java": ">=${java}"
+  }
+}

@@ -1,3 +1,4 @@
+//#if MODERN==0 || FABRIC==1
 package dev.isxander.behindyou.config
 
 import dev.isxander.behindyou.BehindYou
@@ -37,12 +38,21 @@ object Config : Vigilant(File(BehindYou.modDir, "behindyouv3.toml"), "BehindYouV
 
     @Property(
         type = PropertyType.SELECTOR,
-        name = "Keybind Handle Mode",
-        description = "Set how the keybind is turned on.",
+        name = "Frontview Keybind Handle Mode",
+        description = "Set how the keybind is turned on for frontview.",
         category = "General",
         options = ["Hold", "Toggle"]
     )
-    var keybindMode = 0
+    var frontKeybindMode = 0
+
+    @Property(
+        type = PropertyType.SELECTOR,
+        name = "Backview Keybind Handle Mode",
+        description = "Set how the keybind is turned on for backview.",
+        category = "General",
+        options = ["Hold", "Toggle"]
+    )
+    var backKeybindMode = 0
 
     @Property(
         type = PropertyType.SWITCH,
@@ -77,3 +87,4 @@ object Config : Vigilant(File(BehindYou.modDir, "behindyouv3.toml"), "BehindYouV
         hidePropertyIf("warning") { disableWarning }
     }
 }
+//#endif
