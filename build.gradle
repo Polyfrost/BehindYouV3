@@ -1,32 +1,59 @@
-//file:noinspection UnnecessaryQualifiedReference
 //file:noinspection GroovyAssignabilityCheck
 
+import dev.architectury.pack200.java.Pack200Adapter
+
 plugins {
-    id "dev.architectury.architectury-pack200" version "0.1.3"
-    id 'org.jetbrains.kotlin.jvm' version '1.6.10'
-    id "cc.woverflow.loom" version "0.10.1"
-    id "net.kyori.blossom" version "1.3.0"
-    id "java"
+    id("java")
+    id("cc.woverflow.loom")
+    id("org.jetbrains.kotlin.jvm")
+    id("com.github.johnrengelman.shadow")
+    id("dev.architectury.architectury-pack200")
+    id("com.replaymod.preprocess")
+    id("maven-publish")
+    id("net.kyori.blossom")
 }
 
-version = mod_version
-group = "dev.isxander"
-archivesBaseName = mod_name
-
 blossom {
-    String className = "src/main/kotlin/dev/isxander/behindyou/BehindYou.kt"
-    replaceToken("@VER@", project.version, className)
+    def className = "src/main/kotlin/dev/isxander/behindyou/BehindYou.kt"
+    replaceToken("@VER@", mod_version, className)
     replaceToken("@NAME@", mod_name, className)
     replaceToken("@ID@", mod_id, className)
 }
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
-compileJava.options.encoding = 'UTF-8'
+mcVersion = project.ext.mcVersion
+def mcVersionStr = "${(int) (mcVersion / 10000)}.${(int) (mcVersion / 100) % 100}" + (mcVersion % 100 == 0 ? '' : ".${mcVersion % 100}")
+
+preprocess {
+    vars.put("MC", mcVersion)
+    vars.put("MODERN", mcVersion >= 11600 ? 1 : 0)
+    vars.put("FABRIC", mcPlatform == "fabric" ? 1 : 0)
+    vars.put("MODERNFORGE", mcVersion >= 11600 && mcPlatform == "forge" ? 1 : 0)
+}
+
+version = mod_version
+group = "dev.isxander"
+archivesBaseName = "${mod_name}-${mcVersionStr}-${mcPlatform}"
+
+kotlin.jvmToolchain {
+    languageVersion = JavaLanguageVersion.of(mcVersion > 11800 ? 17 : mcVersion >= 11700 ? 16 : 8)
+}
+
+compileKotlin {
+    kotlinOptions {
+        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+    }
+}
+
+java {
+    withSourcesJar()
+}
 
 loom {
     launchConfigs {
         client {
-            arg("--tweakClass", "cc.woverflow.onecore.tweaker.OneCoreTweaker")
+            if (mcVersion < 11600) {
+                arg("--tweakClass", "cc.woverflow.onecore.tweaker.OneCoreTweaker")
+            }
         }
     }
     runConfigs {
@@ -34,9 +61,15 @@ loom {
             ideConfigGenerated = true
         }
     }
-    forge {
-        pack200Provider = new dev.architectury.pack200.java.Pack200Adapter()
+    if (mcPlatform == "forge") {
+        forge {
+            pack200Provider = new Pack200Adapter()
+        }
     }
+}
+
+repositories {
+    maven { url 'https://repo.woverflow.cc/' }
 }
 
 configurations {
@@ -44,58 +77,90 @@ configurations {
     implementation.extendsFrom(include)
 }
 
-repositories {
-    maven { url 'https://repo.woverflow.cc/' }
-}
-
 dependencies {
-    minecraft("com.mojang:minecraft:1.8.9")
-    mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
-    forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
-    compileOnly 'gg.essential:essential-1.8.9-forge:1933'
-    compileOnly 'cc.woverflow:onecore:1.3.3'
-    include ('cc.woverflow:onecore-tweaker:1.3.0') {
-        transitive = false
+    minecraft("com.mojang:minecraft:$mcVersionStr")
+
+    if (mcPlatform == "forge") {
+        if (mcVersion < 11600) {
+            mappings("de.oceanlabs.mcp:$mappingsVersion")
+            compileOnly ("gg.essential:essential-${mcVersionStr}-forge:1933") {
+                exclude(module: "keventbus")
+            }
+
+            runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.0.0")
+            include ("cc.woverflow:onecore-tweaker:1.4.1") {
+                transitive = false
+            }
+        } else {
+            mappings(loom.officialMojangMappings())
+        }
+        forge("net.minecraftforge:forge:$forgeVersion")
+    } else {
+        mappings("net.fabricmc:yarn:$mappingsVersion:v2")
+        modImplementation("net.fabricmc:fabric-loader:$loaderVersion")
+        modImplementation "net.fabricmc.fabric-api:fabric-api:$fabricApiVersion"
+        modImplementation("net.fabricmc:fabric-language-kotlin:$fabricLanguageKotlinVersion")
+        modImplementation("com.terraformersmc:modmenu:$modMenuVersion")
+    }
+    def onecore = "cc.woverflow:onecore-${mcVersionStr}-${mcPlatform}:1.4.3"
+    if (mcVersion < 11600) {
+        compileOnly onecore
+    } else {
+        modImplementation onecore
     }
 }
 
 processResources {
     // this will ensure that this task is redone when the versions change.
-    inputs.property "version", version
-    inputs.property "name", mod_name
     inputs.property "id", mod_id
+    inputs.property "version", mod_version
+    inputs.property "name", mod_name
+    def java = mcVersion > 11800 ? 17 : mcVersion >= 11700 ? 16 : 8
+    def compatLevel = "JAVA_${java}"
+    inputs.property "java", java
+    inputs.property "java_level", compatLevel
+    inputs.property "mcversion", mcVersionStr
 
+    filesMatching("mixins.${mod_id}.json") {
+        expand(
+                "java_level": compatLevel,
+                "id": mod_id
+        )
+    }
+    filesMatching("fabric.mod.json") {
+        expand(
+                "version": mod_version,
+                "java": java,
+                "mcversion": mcVersionStr
+        )
+    }
     filesMatching("mcmod.info") {
         expand(
                 "id": mod_id,
                 "name": mod_name,
-                "version": version
+                "version": version,
+                "mcversion": mcVersionStr
         )
     }
+}
 
-    rename '(.+_at.cfg)', 'META-INF/$1'
+remapJar {
+    archiveClassifier = "nodeps"
+}
+
+jar {
+    manifest.attributes(
+            "ModSide": "CLIENT",
+            "TweakOrder": "0",
+            'TweakClass': 'cc.woverflow.onecore.tweaker.OneCoreTweaker',
+            'ForceLoadAsMod': true
+    )
 }
 
 sourceSets {
     main {
-        output.resourcesDir = java.classesDirectory
+        if (mcVersion < 11600) {
+            output.resourcesDir = java.classesDirectory
+        }
     }
-}
-
-jar {
-    dependsOn configurations.include
-    from(configurations.include.collect { it.isDirectory() ? it : zipTree(it) }) {
-        def i = 0
-        filesMatching("META-INF/NOTICE*") { name = "$name.${i++}" }
-        filesMatching("META-INF/LICENSE*") { name = "$name.${i++}" }
-        filesMatching("META-INF/mods.toml") { name = "$name.${i++}" }
-        filesMatching("LICENSE*") { name = "$name.${i++}" }
-    }
-
-    manifest.attributes(
-            'ModSide': 'CLIENT',
-            'ForceLoadAsMod': true,
-            'TweakClass': 'cc.woverflow.onecore.tweaker.OneCoreTweaker',
-            "TweakOrder": "0"
-    )
 }

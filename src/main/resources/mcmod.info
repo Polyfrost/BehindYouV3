@@ -4,7 +4,7 @@
     "name": "${name}",
     "description": "Lightweight mod to look behind you.",
     "version": "${version}",
-    "mcversion": "1.8.9",
+    "mcversion": "${mcversion}",
     "url": "https://github.com/W-OVERFLOW/BehindYouV3",
     "updateUrl": "",
     "authorList": ["W-OVERFLOW (isXander)"],
