@@ -104,7 +104,6 @@ tasks.remapJar {
 tasks.jar {
     manifest {
         attributes(mapOf(
-            "FMLModType" to "LIBRARY",
             "ModSide" to "CLIENT",
             "TweakOrder" to "0",
             "TweakClass" to "cc.woverflow.onecore.tweaker.OneCoreTweaker",
