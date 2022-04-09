@@ -15,6 +15,10 @@ val mod_name: String by project
 val mod_version: String by project
 val mod_id: String by project
 
+preprocess {
+    vars.put("MODERN", if (project.platform.mcMinor >= 16) 1 else 0)
+}
+
 blossom {
     replaceToken("@VER@", mod_version)
     replaceToken("@NAME@", mod_name)
@@ -62,16 +66,12 @@ dependencies {
         modImplementation("net.fabricmc:fabric-language-kotlin:$fabricLanguageKotlinVersion")
         modImplementation("com.terraformersmc:modmenu:$modMenuVersion")
     }
-    val onecore = "cc.woverflow:onecore-${platform}:1.4.3"
+    val onecore = "cc.woverflow:onecore-${platform}:1.4.7"
     if (platform.isLegacyForge) {
         compileOnly(onecore)
     } else {
         modImplementation(onecore)
     }
-}
-
-preprocess {
-    vars.put("MODERN", if (project.platform.mcMinor >= 16) 1 else 0)
 }
 
 tasks.processResources {

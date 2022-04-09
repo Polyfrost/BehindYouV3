@@ -6,7 +6,6 @@ import dev.isxander.behindyou.config.Config
 import gg.essential.universal.UKeyboard
 import gg.essential.universal.UMinecraft
 import gg.essential.universal.UScreen
-import gg.essential.universal.utils.MCMinecraft
 import gg.essential.universal.wrappers.UPlayer
 import java.io.File
 
@@ -37,7 +36,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
     modid = BehindYou.MODID,
     name = BehindYou.NAME,
     version = BehindYou.VERSION,
-    acceptedMinecraftVersions = "[1.8.9]",
     clientSideOnly = true,
     modLanguageAdapter = "gg.essential.api.utils.KotlinAdapter"
 )
@@ -73,7 +71,7 @@ object BehindYou {
     var previousFrontKey = false
     var frontToggled = false
 
-    val modDir = File(File(runDirectory, "W-OVERFLOW"), "BehindYouV3")
+    val modDir = File(File("./W-OVERFLOW"), "BehindYouV3")
 
     //#if MODERN==0
     @Mod.EventHandler
@@ -283,27 +281,5 @@ object BehindYou {
         //$$ UMinecraft.getSettings().fov = value.toDouble()
         //#endif
     }
-
-    //#if FABRIC==1
-    //$$ fun getFileOfMod(id: String): File? {
-    //$$     FabricLoader.getInstance().getModContainer(id).let {
-    //$$         if (it.isPresent) {
-    //$$             val container = it.get()
-    //$$             return when (container.origin.kind) {
-    //$$                 ModOrigin.Kind.PATH -> {
-    //$$                     container.origin.paths.firstOrNull { file -> file.name.endsWith(".jar") }?.toFile()
-    //$$                 }
-    //$$                 else -> {
-    //$$                     null
-    //$$                 }
-    //$$             }
-    //$$         }
-    //$$     }
-    //$$     return null
-    //$$ }
-    //#endif
 }
-
-val mc: MCMinecraft
-    get() = UMinecraft.getMinecraft()
 //#endif
