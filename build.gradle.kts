@@ -56,7 +56,7 @@ dependencies {
         }
 
         runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.0.0")
-        shade("cc.woverflow:onecore-tweaker:1.4.1")
+        shade("cc.woverflow:onecore-tweaker:1.4.2")
     }
     if (platform.isFabric) {
         val fabricApiVersion: String by project
@@ -84,7 +84,7 @@ tasks.processResources {
     inputs.property("java", java)
     inputs.property("java_level", compatLevel)
     inputs.property("version", mod_version)
-    inputs.property("mcVersionStr", project.platform.mcVersionStr)
+    inputs.property("mcVersionStr", project.platform.mcVersionStr.substringBeforeLast(".") + ".x")
     filesMatching(listOf("fabric.mod.json", "mcmod.info", "mixins.${mod_id}.json")) {
         expand(mapOf(
             "id" to mod_id,
