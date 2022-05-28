@@ -68,7 +68,7 @@ object Config : Vigilant(File(BehindYou.modDir, "behindyouv3.toml"), "BehindYouV
         description = "Set the FOV when clicking on the behind keybind.",
         category = "General",
         min = 30,
-        max = 130
+        max = 110
     )
     var backFOV = 100
 
@@ -78,7 +78,7 @@ object Config : Vigilant(File(BehindYou.modDir, "behindyouv3.toml"), "BehindYouV
         description = "Set the FOV when clicking on the front keybind.",
         category = "General",
         min = 30,
-        max = 130
+        max = 110
     )
     var frontFOV = 100
 
