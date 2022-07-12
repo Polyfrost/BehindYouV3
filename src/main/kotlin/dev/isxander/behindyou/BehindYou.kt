@@ -1,15 +1,15 @@
 //#if MODERN==0 || FABRIC==1
 package dev.isxander.behindyou
 
-import cc.woverflow.onecore.utils.*
-import dev.isxander.behindyou.config.Config
-import gg.essential.universal.UKeyboard
-import gg.essential.universal.UMinecraft
-import gg.essential.universal.UScreen
-import gg.essential.universal.wrappers.UPlayer
-import java.io.File
-
 //#if MODERN==0
+import cc.polyfrost.oneconfig.libs.universal.UKeyboard
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
+import cc.polyfrost.oneconfig.libs.universal.UScreen
+import cc.polyfrost.oneconfig.libs.universal.wrappers.UPlayer
+import cc.polyfrost.oneconfig.utils.commands.CommandManager
+import cc.polyfrost.oneconfig.utils.commands.annotations.Command
+import cc.polyfrost.oneconfig.utils.commands.annotations.Main
+import dev.isxander.behindyou.config.BehindYouConfig
 import net.minecraft.client.settings.KeyBinding
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.client.registry.ClientRegistry
@@ -18,6 +18,8 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
+import java.io.File
+
 //#endif
 
 //#if FABRIC==1
@@ -36,8 +38,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
     modid = BehindYou.MODID,
     name = BehindYou.NAME,
     version = BehindYou.VERSION,
-    clientSideOnly = true,
-    modLanguageAdapter = "gg.essential.api.utils.KotlinAdapter"
+    clientSideOnly = true
 )
 //#endif
 object BehindYou {
@@ -85,13 +86,6 @@ object BehindYou {
         //$$ val file = getFileOfMod(MODID)
         //$$ if (file == null) return
         //#endif
-        Updater.addToUpdater(
-            //#if FABRIC==0
-            event.sourceFile
-            //#else
-            //$$ file
-            //#endif
-            , NAME, MODID, VERSION, "W-OVERFLOW/$MODID")
     }
 
     //#if MODERN==0
@@ -119,12 +113,7 @@ object BehindYou {
         //#if FABRIC==1
         //$$ ClientTickEvents.END_CLIENT_TICK.register { onTick() }
         //#endif
-
-        command("behindyou", aliases = arrayListOf("behindyouv3")) {
-            main {
-                Config.openScreen()
-            }
-        }
+        CommandManager.INSTANCE.registerCommand(BehindYouCommand.Companion::class.java)
     }
 
     //#if MODERN==0
@@ -137,7 +126,7 @@ object BehindYou {
 
     fun onTick() {
         if (UScreen.currentScreen != null || UMinecraft.getWorld() == null || !UPlayer.hasPlayer()) {
-            if (Config.frontKeybindMode == 0 || Config.backKeybindMode == 0) {
+            if (BehindYouConfig.frontKeybindMode == 0 || BehindYouConfig.backKeybindMode == 0) {
                 resetAll()
             }
             return
@@ -170,7 +159,7 @@ object BehindYou {
                     }
                     enterBack()
                 }
-            } else if (Config.backKeybindMode == 0) {
+            } else if (BehindYouConfig.backKeybindMode == 0) {
                 resetBack()
             }
             setPerspective()
@@ -187,7 +176,7 @@ object BehindYou {
                     }
                     enterFront()
                 }
-            } else if (Config.frontKeybindMode == 0) {
+            } else if (BehindYouConfig.frontKeybindMode == 0) {
                 resetFront()
             }
 
@@ -197,7 +186,7 @@ object BehindYou {
 
     private fun setPerspective() {
         //#if MODERN==0
-        mc.renderGlobal.setDisplayListEntitiesDirty()
+        UMinecraft.getMinecraft().renderGlobal.setDisplayListEntitiesDirty()
         //#else
         //$$ mc.gameRenderer.onCameraEntitySet(if (mc.options.getPerspective().isFirstPerson()) mc.getCameraEntity() else null)
         //#endif
@@ -208,8 +197,8 @@ object BehindYou {
         previousPerspective = getPerspective()
         previousFOV = getFOV()
         setPerspective(2)
-        if (Config.changeFOV) {
-            setFOV(Config.backFOV)
+        if (BehindYouConfig.changeFOV) {
+            setFOV(BehindYouConfig.backFOV)
         }
     }
 
@@ -218,14 +207,15 @@ object BehindYou {
         previousPerspective = getPerspective()
         previousFOV = getFOV()
         setPerspective(1)
-        if (Config.changeFOV) {
-            setFOV(Config.frontFOV)
+        if (BehindYouConfig.changeFOV) {
+            setFOV(BehindYouConfig.frontFOV)
         }
     }
 
     fun resetBack() {
         backToggled = false
-        setPerspective(previousPerspective
+        setPerspective(
+            previousPerspective
             //#if MODERN==1
             //$$ .ordinal
             //#endif
@@ -280,6 +270,16 @@ object BehindYou {
         //#else
         //$$ UMinecraft.getSettings().fov = value.toDouble()
         //#endif
+    }
+
+    @Command(value = "behindyou", description = "Open the BehindYou config GUI.")
+    class BehindYouCommand {
+        companion object {
+            @Main
+            fun main() {
+                BehindYouConfig.openGui()
+            }
+        }
     }
 }
 //#endif
