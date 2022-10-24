@@ -18,9 +18,6 @@
         "adapter": "kotlin",
         "value": "dev.isxander.behindyou.BehindYou::onInit"
       }
-    ],
-    "modmenu": [
-      "dev.isxander.behindyou.config.BehindYouModMenu"
     ]
   },
   "license": "LGPL-3.0",

@@ -31,13 +31,16 @@ blossom {
 version = mod_version
 group = "dev.isxander"
 base {
-    archivesName.set("$mod_id-$platform")
+    archivesName.set("$mod_name-$platform")
 }
 loom {
     noServerRunConfigs()
     if (project.platform.isLegacyForge) {
         launchConfigs.named("client") {
             arg("--tweakClass", "cc.polyfrost.oneconfigwrapper.OneConfigWrapper")
+        }
+        runConfigs.named("client") {
+            vmArgs.remove("-XstartOnFirstThread")
         }
     }
 }
@@ -55,23 +58,13 @@ sourceSets {
 
 repositories {
     maven("https://repo.polyfrost.cc/releases")
-    maven("https://maven.terraformersmc.com/releases/")
-    maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
 }
 
 dependencies {
-    if (platform.isFabric) {
-        val fabricApiVersion: String by project
-        val fabricLanguageKotlinVersion: String by project
-        val modMenuVersion: String by project
-        modImplementation("net.fabricmc.fabric-api:fabric-api:$fabricApiVersion")
-        modImplementation("net.fabricmc:fabric-language-kotlin:$fabricLanguageKotlinVersion")
-        modImplementation("com.terraformersmc:modmenu:$modMenuVersion")
-    }
     if (platform.isLegacyForge) {
         runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.1.0")
     }
-    compileOnly("cc.polyfrost:oneconfig-1.8.9-forge:0.1.0-alpha50")
+    compileOnly("cc.polyfrost:oneconfig-1.8.9-forge:0.1.0-alpha110")
     shade("cc.polyfrost:oneconfig-wrapper-1.8.9-forge:1.0.0-alpha6")
 }
 

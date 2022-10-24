@@ -10,9 +10,7 @@ import cc.polyfrost.oneconfig.utils.commands.CommandManager
 import cc.polyfrost.oneconfig.utils.commands.annotations.Command
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main
 import dev.isxander.behindyou.config.BehindYouConfig
-import net.minecraft.client.settings.KeyBinding
 import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
@@ -38,7 +36,8 @@ import java.io.File
     modid = BehindYou.MODID,
     name = BehindYou.NAME,
     version = BehindYou.VERSION,
-    clientSideOnly = true
+    clientSideOnly = true,
+    modLanguageAdapter = "cc.polyfrost.oneconfig.utils.KotlinLanguageAdapter"
 )
 //#endif
 object BehindYou {
@@ -54,21 +53,8 @@ object BehindYou {
     //$$ var previousFOV = 0.0
     //#endif
 
-    val backKeybind =
-        //#if MODERN==0
-        KeyBinding("BehindYou (Back)", UKeyboard.KEY_NONE, "BehindYouV3")
-        //#else
-        //$$ KeyBinding("BehindYou (Back)", InputUtil.Type.KEYSYM, UKeyboard.KEY_NONE, "BehindYouV3")
-        //#endif
     var previousBackKey = false
     var backToggled = false
-
-    val frontKeybind =
-        //#if MODERN==0
-        KeyBinding("BehindYou (Front)", UKeyboard.KEY_NONE, "BehindYouV3")
-        //#else
-        //$$ KeyBinding("BehindYou (Front)", InputUtil.Type.KEYSYM, UKeyboard.KEY_NONE, "BehindYouV3")
-        //#endif
     var previousFrontKey = false
     var frontToggled = false
 
@@ -98,10 +84,6 @@ object BehindYou {
         //#if MODERN==1
         //$$ onPreInit()
         //#endif
-        //#if MODERN==0
-        ClientRegistry.registerKeyBinding(backKeybind)
-        ClientRegistry.registerKeyBinding(frontKeybind)
-        //#endif
         //#if FABRIC==1
         //$$ KeyBindingHelper.registerKeyBinding(backKeybind)
         //$$ KeyBindingHelper.registerKeyBinding(frontKeybind)
@@ -113,7 +95,7 @@ object BehindYou {
         //#if FABRIC==1
         //$$ ClientTickEvents.END_CLIENT_TICK.register { onTick() }
         //#endif
-        CommandManager.INSTANCE.registerCommand(BehindYouCommand.Companion::class.java)
+        CommandManager.INSTANCE.registerCommand(BehindYouCommand())
     }
 
     //#if MODERN==0
@@ -126,24 +108,14 @@ object BehindYou {
 
     fun onTick() {
         if (UScreen.currentScreen != null || UMinecraft.getWorld() == null || !UPlayer.hasPlayer()) {
-            if (BehindYouConfig.frontKeybindMode == 0 || BehindYouConfig.backKeybindMode == 0) {
+            if (!BehindYouConfig.frontKeybindMode || !BehindYouConfig.backKeybindMode) {
                 resetAll()
             }
             return
         }
 //
-        val backDown = backKeybind.
-            //#if MODERN==0
-            isKeyDown
-            //#else
-            //$$ isPressed
-            //#endif
-        val frontDown = frontKeybind.
-            //#if MODERN==0
-            isKeyDown
-            //#else
-            //$$ isPressed
-            //#endif
+        val backDown = BehindYouConfig.backKeybind.keyBinds.any { UKeyboard.isKeyDown(it) }
+        val frontDown = BehindYouConfig.frontKeybind.keyBinds.any { UKeyboard.isKeyDown(it) }
 
         if (backDown && frontDown) return
 
@@ -159,7 +131,7 @@ object BehindYou {
                     }
                     enterBack()
                 }
-            } else if (BehindYouConfig.backKeybindMode == 0) {
+            } else if (!BehindYouConfig.backKeybindMode) {
                 resetBack()
             }
             setPerspective()
@@ -176,7 +148,7 @@ object BehindYou {
                     }
                     enterFront()
                 }
-            } else if (BehindYouConfig.frontKeybindMode == 0) {
+            } else if (!BehindYouConfig.frontKeybindMode) {
                 resetFront()
             }
 
@@ -274,11 +246,9 @@ object BehindYou {
 
     @Command(value = "behindyou", description = "Open the BehindYou config GUI.")
     class BehindYouCommand {
-        companion object {
-            @Main
-            fun main() {
-                BehindYouConfig.openGui()
-            }
+        @Main
+        fun main() {
+            BehindYouConfig.openGui()
         }
     }
 }

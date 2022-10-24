@@ -4,12 +4,14 @@ package dev.isxander.behindyou.config
 import cc.polyfrost.oneconfig.config.Config
 import cc.polyfrost.oneconfig.config.annotations.DualOption
 import cc.polyfrost.oneconfig.config.annotations.Info
+import cc.polyfrost.oneconfig.config.annotations.KeyBind
 import cc.polyfrost.oneconfig.config.annotations.Slider
 import cc.polyfrost.oneconfig.config.annotations.Switch
 import cc.polyfrost.oneconfig.config.data.InfoType
 import cc.polyfrost.oneconfig.config.data.Mod
 import cc.polyfrost.oneconfig.config.data.ModType
 import cc.polyfrost.oneconfig.config.migration.VigilanceMigrator
+import cc.polyfrost.oneconfig.libs.universal.UKeyboard
 import dev.isxander.behindyou.BehindYou
 import java.io.File
 
@@ -18,36 +20,37 @@ object BehindYouConfig : Config(
     "behindyouv3.json"
 ) {
 
-    @Info(
-        text = "The ability to edit the keybind is in the Minecraft Controls Menu.\n" +
-                "You can find the Minecraft controls menu in Options -> Controls.",
-        category = "General", type = InfoType.INFO, size = 2
+    @KeyBind(
+        name = "Frontview Keybind"
     )
-    var ignored = false
+    var frontKeybind = OnePlaceholderKeyBind(UKeyboard.KEY_NONE)
+
+    @KeyBind(
+        name = "Backview Keybind"
+    )
+    var backKeybind = OnePlaceholderKeyBind(UKeyboard.KEY_NONE)
 
     @DualOption(
         name = "Frontview Keybind Handle Mode",
-        category = "General",
         left = "Hold", right = "Toggle"
     )
-    var frontKeybindMode = 0
+    var frontKeybindMode = false
+
+    //todo WHY IS DUAL OPTION A BOOLEAN
 
     @DualOption(
         name = "Backview Keybind Handle Mode",
-        category = "General",
         left = "Hold", right = "Toggle"
     )
-    var backKeybindMode = 0
+    var backKeybindMode = false
 
     @Switch(
         name = "Change FOV When Clicking Keybind",
-        category = "General"
     )
     var changeFOV = false
 
     @Slider(
         name = "FOV For Backview Keybind",
-        category = "General",
         min = 30F,
         max = 110F
     )
@@ -55,7 +58,6 @@ object BehindYouConfig : Config(
 
     @Slider(
         name = "Change FOV For Frontview Keybind",
-        category = "General",
         min = 30F,
         max = 110F
     )
