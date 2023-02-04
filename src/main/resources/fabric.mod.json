@@ -5,12 +5,12 @@
   "version": "${version}",
   "description": "Look behind you with ease!",
   "authors": [
-    "W-OVERFLOW"
+    "Polyfrost (isXander)"
   ],
   "contact": {
-    "homepage": "https://github.com/W-OVERFLOW/BehindYouV3",
-    "sources": "https://github.com/W-OVERFLOW/BehindYouV3",
-    "issues": "https://github.com/W-OVERFLOW/BehindYouV3/issues"
+    "homepage": "https://github.com/Polyfrost/BehindYouV3",
+    "sources": "https://github.com/Polyfrost/BehindYouV3",
+    "issues": "https://github.com/Polyfrost/BehindYouV3/issues"
   },
   "entrypoints": {
     "client": [

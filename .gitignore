@@ -22,3 +22,5 @@ build
 # other
 eclipse
 !**/*.gitkeep
+**/run
+.vscode/

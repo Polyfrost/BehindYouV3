@@ -1,13 +1,10 @@
-//#if MODERN==0 || FABRIC==1
 package dev.isxander.behindyou.config
 
 import cc.polyfrost.oneconfig.config.Config
 import cc.polyfrost.oneconfig.config.annotations.DualOption
-import cc.polyfrost.oneconfig.config.annotations.Info
 import cc.polyfrost.oneconfig.config.annotations.KeyBind
 import cc.polyfrost.oneconfig.config.annotations.Slider
 import cc.polyfrost.oneconfig.config.annotations.Switch
-import cc.polyfrost.oneconfig.config.data.InfoType
 import cc.polyfrost.oneconfig.config.data.Mod
 import cc.polyfrost.oneconfig.config.data.ModType
 import cc.polyfrost.oneconfig.config.migration.VigilanceMigrator
@@ -16,7 +13,7 @@ import dev.isxander.behindyou.BehindYou
 import java.io.File
 
 object BehindYouConfig : Config(
-    Mod("BehindYouV3", ModType.UTIL_QOL, VigilanceMigrator(File(BehindYou.modDir, "behindyouv3.toml").path)),
+    Mod("BehindYouV3", ModType.UTIL_QOL, "/behindyou_dark.svg", VigilanceMigrator(File(BehindYou.modDir, "behindyouv3.toml").path)),
     "behindyouv3.json"
 ) {
 
@@ -67,4 +64,3 @@ object BehindYouConfig : Config(
         initialize()
     }
 }
-//#endif
