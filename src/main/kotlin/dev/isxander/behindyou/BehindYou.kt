@@ -13,7 +13,6 @@ import dev.isxander.behindyou.config.BehindYouConfig
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import java.io.File
@@ -58,21 +57,7 @@ object BehindYou {
     var previousFrontKey = false
     var frontToggled = false
 
-    val modDir = File(File("./W-OVERFLOW"), "BehindYouV3")
-
-    //#if MODERN==0
-    @Mod.EventHandler
-    fun onPreInit(event: FMLPreInitializationEvent)
-    //#else
-    //$$ fun onPreInit()
-    //#endif
-    {
-        if (!modDir.exists()) modDir.mkdirs()
-        //#if FABRIC==1
-        //$$ val file = getFileOfMod(MODID)
-        //$$ if (file == null) return
-        //#endif
-    }
+    val oldModDir = File(File("./W-OVERFLOW"), "BehindYouV3")
 
     //#if MODERN==0
     @Mod.EventHandler

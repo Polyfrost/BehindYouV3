@@ -1,16 +1,11 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        mavenCentral()
-        maven("https://maven.fabricmc.net")
-        maven("https://maven.architectury.dev/")
-        maven("https://maven.minecraftforge.net")
         maven("https://repo.polyfrost.cc/releases")
-        maven("https://repo.essential.gg/repository/maven-public")
     }
     plugins {
-        val egtVersion = "0.1.12"
-        id("gg.essential.multi-version.root") version egtVersion
+        val egtVersion = "0.1.28"
+        id("cc.polyfrost.multi-version.root") version egtVersion
     }
 }
 

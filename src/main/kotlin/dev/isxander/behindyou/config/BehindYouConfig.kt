@@ -13,7 +13,7 @@ import dev.isxander.behindyou.BehindYou
 import java.io.File
 
 object BehindYouConfig : Config(
-    Mod("BehindYouV3", ModType.UTIL_QOL, "/behindyou_dark.svg", VigilanceMigrator(File(BehindYou.modDir, "behindyouv3.toml").path)),
+    Mod("BehindYouV3", ModType.UTIL_QOL, "/behindyou_dark.svg", VigilanceMigrator(File(BehindYou.oldModDir, "behindyouv3.toml").path)),
     "behindyouv3.json"
 ) {
 
