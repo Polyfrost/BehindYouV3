@@ -2,6 +2,10 @@
 package dev.isxander.behindyou
 
 //#if MODERN==0
+import cc.polyfrost.oneconfig.gui.animations.Animation
+import cc.polyfrost.oneconfig.gui.animations.DummyAnimation
+import cc.polyfrost.oneconfig.gui.animations.EaseInOutQuad
+import cc.polyfrost.oneconfig.libs.universal.UChat
 import cc.polyfrost.oneconfig.libs.universal.UKeyboard
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import cc.polyfrost.oneconfig.libs.universal.UScreen
@@ -59,6 +63,10 @@ object BehindYou {
 
     val oldModDir = File(File("./W-OVERFLOW"), "BehindYouV3")
 
+    var end = 0f
+    var distance = 0f
+    var animation: Animation = DummyAnimation(0f)
+
     //#if MODERN==0
     @Mod.EventHandler
     fun onInit(event: FMLInitializationEvent)
@@ -91,6 +99,25 @@ object BehindYou {
     }
     //#endif
 
+    fun level(): Float {
+        animation = if (getPerspective() == 0) {
+            DummyAnimation(0.3f)
+        }else {
+            if (end != 0.1f) end = distance
+            EaseInOutQuad(200, animation.get(), end, false)
+        }
+        if (animation.get() < 0.3f) {
+            //#if MODERN==0
+            UMinecraft.getSettings().thirdPersonView = 0
+            //#else
+            //$$ UMinecraft.getSettings().perspective = Perspective.values()[0]
+            //#endif
+        }
+        return if (animation.get() < 0.3f) 0.1f else animation.get()
+    }
+
+
+
     fun onTick() {
         if (UScreen.currentScreen != null || UMinecraft.getWorld() == null || !UPlayer.hasPlayer()) {
             if (!BehindYouConfig.frontKeybindMode || !BehindYouConfig.backKeybindMode) {
@@ -98,7 +125,7 @@ object BehindYou {
             }
             return
         }
-//
+
         val backDown = BehindYouConfig.backKeybind.keyBinds.any { UKeyboard.isKeyDown(it) }
         val frontDown = BehindYouConfig.frontKeybind.keyBinds.any { UKeyboard.isKeyDown(it) }
 
@@ -151,7 +178,6 @@ object BehindYou {
 
     fun enterBack() {
         backToggled = true
-        previousPerspective = getPerspective()
         previousFOV = getFOV()
         setPerspective(2)
         if (BehindYouConfig.changeFOV) {
@@ -161,7 +187,6 @@ object BehindYou {
 
     fun enterFront() {
         frontToggled = true
-        previousPerspective = getPerspective()
         previousFOV = getFOV()
         setPerspective(1)
         if (BehindYouConfig.changeFOV) {
@@ -199,19 +224,29 @@ object BehindYou {
         }
     }
 
-    private fun getPerspective() =
+    fun getPerspective() =
         //#if MODERN==0
         UMinecraft.getSettings().thirdPersonView
         //#else
         //$$ UMinecraft.getSettings().perspective
         //#endif
 
-    private fun setPerspective(value: Int) {
+    fun setPerspective(value: Int) {
         //#if MODERN==0
-        UMinecraft.getSettings().thirdPersonView = value
+        previousPerspective = getPerspective()
         //#else
-        //$$ UMinecraft.getSettings().perspective = Perspective.values()[value]
+        //$$ previousPerspective = getPerspective()
         //#endif
+        if (value == 0) {
+            end = 0.1f
+        } else {
+            end = distance
+            //#if MODERN==0
+            UMinecraft.getSettings().thirdPersonView = value
+            //#else
+            //$$ UMinecraft.getSettings().perspective = Perspective.values()[value]
+            //#endif
+        }
     }
 
     private fun getFOV() =
