@@ -100,7 +100,7 @@ object BehindYou {
             DummyAnimation(0.1f)
         }else {
             if (end != 0.3f) end = distance
-            Linear(duration.toInt(), an, end, false)
+            if (an > distance) DummyAnimation(distance) else Linear(duration.toInt(), an, end, false)
         }
         if (an <= 0.4f && animation.end == 0.3f) {
             //#if MODERN==0
