@@ -1,12 +1,8 @@
 package dev.isxander.behindyou.config
 
 import cc.polyfrost.oneconfig.config.Config
-import cc.polyfrost.oneconfig.config.annotations.DualOption
-import cc.polyfrost.oneconfig.config.annotations.KeyBind
-import cc.polyfrost.oneconfig.config.annotations.Slider
-import cc.polyfrost.oneconfig.config.annotations.Switch
-import cc.polyfrost.oneconfig.config.data.Mod
-import cc.polyfrost.oneconfig.config.data.ModType
+import cc.polyfrost.oneconfig.config.annotations.*
+import cc.polyfrost.oneconfig.config.data.*
 import cc.polyfrost.oneconfig.config.migration.VigilanceMigrator
 import cc.polyfrost.oneconfig.libs.universal.UKeyboard
 import dev.isxander.behindyou.BehindYou
@@ -22,24 +18,40 @@ object BehindYouConfig : Config(
     )
     var frontKeybind = OnePlaceholderKeyBind(UKeyboard.KEY_NONE)
 
-    @KeyBind(
-        name = "Backview Keybind"
-    )
-    var backKeybind = OnePlaceholderKeyBind(UKeyboard.KEY_NONE)
-
     @DualOption(
         name = "Frontview Keybind Handle Mode",
         left = "Hold", right = "Toggle"
     )
     var frontKeybindMode = false
 
-    //todo WHY IS DUAL OPTION A BOOLEAN
+    @KeyBind(
+        name = "Backview Keybind"
+    )
+    var backKeybind = OnePlaceholderKeyBind(UKeyboard.KEY_NONE)
 
     @DualOption(
         name = "Backview Keybind Handle Mode",
         left = "Hold", right = "Toggle"
     )
     var backKeybindMode = false
+
+    @DualOption(
+        name = "Back To",
+        left = "Previous", right = "First",
+        size = 2
+    )
+    var backToFirst = true
+
+    @Checkbox(
+        name = "Zoom Animations"
+    )
+    var animation = false
+
+    @Slider(
+        name = "Animation Speed",
+        min = 0.1f, max = 2f
+    )
+    var speed = 1f
 
     @Switch(
         name = "Change FOV When Clicking Keybind",

@@ -2,18 +2,12 @@
 package dev.isxander.behindyou
 
 //#if MODERN==0
-import cc.polyfrost.oneconfig.gui.animations.Animation
-import cc.polyfrost.oneconfig.gui.animations.DummyAnimation
-import cc.polyfrost.oneconfig.gui.animations.EaseInOutQuad
-import cc.polyfrost.oneconfig.libs.universal.UChat
-import cc.polyfrost.oneconfig.libs.universal.UKeyboard
-import cc.polyfrost.oneconfig.libs.universal.UMinecraft
-import cc.polyfrost.oneconfig.libs.universal.UScreen
+import cc.polyfrost.oneconfig.gui.animations.*
+import cc.polyfrost.oneconfig.libs.universal.*
 import cc.polyfrost.oneconfig.libs.universal.wrappers.UPlayer
 import cc.polyfrost.oneconfig.utils.commands.CommandManager
-import cc.polyfrost.oneconfig.utils.commands.annotations.Command
-import cc.polyfrost.oneconfig.utils.commands.annotations.Main
-import dev.isxander.behindyou.config.BehindYouConfig
+import cc.polyfrost.oneconfig.utils.commands.annotations.*
+import dev.isxander.behindyou.config.*
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
@@ -50,6 +44,7 @@ object BehindYou {
 
     //#if MODERN==0
     var previousPerspective = 0
+    var vPerspective = 0
     var previousFOV = 0f
     //#else
     //$$ var previousPerspective = Perspective.FIRST_PERSON
@@ -99,32 +94,34 @@ object BehindYou {
     }
     //#endif
 
-    fun level(): Float {
+    fun level(an: Float): Float {
+        val duration = if (BehindYouConfig.animation) 50 / BehindYouConfig.speed else 0f
         animation = if (getPerspective() == 0) {
-            DummyAnimation(0.3f)
+            DummyAnimation(0.1f)
         }else {
-            if (end != 0.1f) end = distance
-            EaseInOutQuad(200, animation.get(), end, false)
+            if (end != 0.3f) end = distance
+            Linear(duration.toInt(), an, end, false)
         }
-        if (animation.get() < 0.3f) {
+        if (an <= 0.4f && animation.end == 0.3f) {
             //#if MODERN==0
             UMinecraft.getSettings().thirdPersonView = 0
             //#else
             //$$ UMinecraft.getSettings().perspective = Perspective.values()[0]
             //#endif
         }
-        return if (animation.get() < 0.3f) 0.1f else animation.get()
+        return an
     }
 
 
 
-    fun onTick() {
+    private fun onTick() {
         if (UScreen.currentScreen != null || UMinecraft.getWorld() == null || !UPlayer.hasPlayer()) {
             if (!BehindYouConfig.frontKeybindMode || !BehindYouConfig.backKeybindMode) {
                 resetAll()
             }
             return
         }
+        if (BehindYouConfig.backToFirst) previousPerspective = 0
 
         val backDown = BehindYouConfig.backKeybind.keyBinds.any { UKeyboard.isKeyDown(it) }
         val frontDown = BehindYouConfig.frontKeybind.keyBinds.any { UKeyboard.isKeyDown(it) }
@@ -141,7 +138,7 @@ object BehindYou {
                     if (frontToggled) {
                         resetFront()
                     }
-                    enterBack()
+                    if (vPerspective != 2) enterBack() else resetBack()
                 }
             } else if (!BehindYouConfig.backKeybindMode) {
                 resetBack()
@@ -158,7 +155,7 @@ object BehindYou {
                     if (backToggled) {
                         resetBack()
                     }
-                    enterFront()
+                    if (vPerspective != 1) enterFront() else resetFront()
                 }
             } else if (!BehindYouConfig.frontKeybindMode) {
                 resetFront()
@@ -224,7 +221,7 @@ object BehindYou {
         }
     }
 
-    fun getPerspective() =
+    private fun getPerspective() =
         //#if MODERN==0
         UMinecraft.getSettings().thirdPersonView
         //#else
@@ -233,16 +230,19 @@ object BehindYou {
 
     fun setPerspective(value: Int) {
         //#if MODERN==0
-        previousPerspective = getPerspective()
+        if (vPerspective == value) return
+        previousPerspective = vPerspective
+        vPerspective = value
         //#else
         //$$ previousPerspective = getPerspective()
         //#endif
         if (value == 0) {
-            end = 0.1f
+            end = 0.3f
         } else {
             end = distance
             //#if MODERN==0
             UMinecraft.getSettings().thirdPersonView = value
+            animation = DummyAnimation(0.3f)
             //#else
             //$$ UMinecraft.getSettings().perspective = Perspective.values()[value]
             //#endif
