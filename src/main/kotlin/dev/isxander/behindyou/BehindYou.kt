@@ -7,8 +7,10 @@ import cc.polyfrost.oneconfig.libs.universal.*
 import cc.polyfrost.oneconfig.libs.universal.wrappers.UPlayer
 import cc.polyfrost.oneconfig.utils.commands.CommandManager
 import cc.polyfrost.oneconfig.utils.commands.annotations.*
+import club.sk1er.patcher.config.PatcherConfig
 import dev.isxander.behindyou.config.*
 import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -61,6 +63,7 @@ object BehindYou {
     var end = 0f
     var distance = 0f
     var animation: Animation = DummyAnimation(0f)
+    private var isPatcher = false
 
     //#if MODERN==0
     @Mod.EventHandler
@@ -78,6 +81,7 @@ object BehindYou {
         //#endif
 
         //#if MODERN==0
+        isPatcher = Loader.isModLoaded("patcher")
         MinecraftForge.EVENT_BUS.register(this)
         //#endif
         //#if FABRIC==1
@@ -97,7 +101,7 @@ object BehindYou {
     fun level(an: Float): Float {
         val duration = if (BehindYouConfig.animation) 50 / BehindYouConfig.speed else 0f
         animation = if (getPerspective() == 0) {
-            DummyAnimation(0.1f)
+            DummyAnimation(if (isPatcher && PatcherConfig.parallaxFix) -0.05f else 0.1f)
         }else {
             if (end != 0.3f) end = distance
             if (an > distance) DummyAnimation(distance) else Linear(duration.toInt(), an, end, false)
