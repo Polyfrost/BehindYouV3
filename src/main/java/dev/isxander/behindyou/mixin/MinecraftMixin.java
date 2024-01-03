@@ -18,11 +18,7 @@ public class MinecraftMixin {
             if (perspective > 2) perspective = 0;
             BehindYou.INSTANCE.setPerspective(perspective);
         } else {
-            //#if MODERN==0
             instance.thirdPersonView = value;
-            //#else
-            //$$ instance.perspective = Perspective.values()[value]
-            //#endif
         }
     }
 }
