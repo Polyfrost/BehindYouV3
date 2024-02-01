@@ -20,11 +20,20 @@ public class EntityRendererMixin {
         return behindYouV3$enable() ? 1 : instance.thirdPersonView;
     }
 
+    @Redirect(method = "orientCamera", at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;thirdPersonView:I", ordinal = 1))
+    private int shaderFix(GameSettings instance) {
+        return behindYouV3$enable() ? BehindYou.INSTANCE.getRealPerspective() : instance.thirdPersonView;
+    }
+
+    @Redirect(method = "orientCamera", at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;thirdPersonView:I", ordinal = 2))
+    private int rotateFix(GameSettings instance) {
+        return behindYouV3$enable() ? BehindYou.INSTANCE.getRealPerspective() : instance.thirdPersonView;
+    }
+
     @ModifyArg(method = "orientCamera", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GlStateManager;translate(FFF)V", ordinal = 2), index = 2)
     private float set(float z) {
         BehindYou.INSTANCE.setDistance(-z);
-        float level = behindYouV3$enable() ? -BehindYou.INSTANCE.level(BehindYou.INSTANCE.getAnimation().get()) : z;
-        return level;
+        return behindYouV3$enable() ? -BehindYou.INSTANCE.level() : z;
     }
 
 }

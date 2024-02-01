@@ -43,7 +43,7 @@ object BehindYouConfig : Config(
     var backToFirst = true
 
     @Checkbox(
-        name = "Zoom Animations"
+        name = "Camera Animations"
     )
     var animation = false
 
@@ -74,5 +74,6 @@ object BehindYouConfig : Config(
 
     init {
         initialize()
+        addDependency("speed", "animation")
     }
 }

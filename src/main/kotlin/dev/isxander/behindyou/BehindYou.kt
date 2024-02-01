@@ -15,6 +15,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import java.io.File
+import kotlin.math.abs
 
 @Mod(
     modid = BehindYou.MODID,
@@ -32,6 +33,7 @@ object BehindYou {
     var previousPerspective = 0
     var vPerspective = 0
     var previousFOV = 0f
+    var realPerspective = 0
 
     var previousBackKey = false
     var backToggled = false
@@ -58,25 +60,30 @@ object BehindYou {
         onTick()
     }
 
-    fun level(an: Float): Float {
-        val duration = if (BehindYouConfig.animation) 50 / BehindYouConfig.speed else 0f
-        animation = if (getPerspective() == 0) {
+    fun level(): Float {
+        animation = if (realPerspective == 0) {
+            if (mc.gameSettings.thirdPersonView != 0) {
+                mc.gameSettings.thirdPersonView = 0
+                mc.renderGlobal.setDisplayListEntitiesDirty()
+            }
             DummyAnimation(if (isPatcher && PatcherConfig.parallaxFix) -0.05f else 0.1f)
-        }else {
+        } else {
             if (end != 0.3f) end = distance
-            if (an > distance) DummyAnimation(distance) else Linear(duration.toInt(), an, end, false)
+            if (animation.get() > distance) {
+                DummyAnimation(distance)
+            } else
+                EaseOutQuart(if (BehindYouConfig.animation) 200 * abs(animation.get() - end) / BehindYouConfig.speed else 0f, animation.get(), end, false)
         }
-        if (an <= 0.4f && animation.end == 0.3f) {
-            UMinecraft.getSettings().thirdPersonView = 0
+        if (animation.isFinished && animation.end == 0.3f) {
+            mc.gameSettings.thirdPersonView = 0
+            realPerspective = 0
             mc.renderGlobal.setDisplayListEntitiesDirty()
         }
-        return an
+        return animation.get()
     }
 
-
-
     private fun onTick() {
-        if (UScreen.currentScreen != null || UMinecraft.getWorld() == null || !UPlayer.hasPlayer()) {
+        if (UScreen.currentScreen != null || mc.theWorld == null || !UPlayer.hasPlayer()) {
             if (!BehindYouConfig.frontKeybindMode || !BehindYouConfig.backKeybindMode) {
                 resetAll()
             }
@@ -166,8 +173,6 @@ object BehindYou {
         }
     }
 
-    private fun getPerspective() = UMinecraft.getSettings().thirdPersonView
-
     fun setPerspective(value: Int) {
         if (vPerspective == value) return
         previousPerspective = vPerspective
@@ -175,18 +180,24 @@ object BehindYou {
 
         if (value == 0) {
             end = 0.3f
+            if (!BehindYouConfig.animation) {
+                mc.gameSettings.thirdPersonView = 0
+                realPerspective = 0
+                mc.renderGlobal.setDisplayListEntitiesDirty()
+            }
         } else {
             end = distance
-            UMinecraft.getSettings().thirdPersonView = value
+            mc.gameSettings.thirdPersonView = value
+            realPerspective = value
             mc.renderGlobal.setDisplayListEntitiesDirty()
             animation = DummyAnimation(0.3f)
         }
     }
 
-    private fun getFOV() = UMinecraft.getSettings().fovSetting
+    private fun getFOV() = mc.gameSettings.fovSetting
 
     private fun setFOV(value: Number) {
-        UMinecraft.getSettings().fovSetting = value.toFloat()
+        mc.gameSettings.fovSetting = value.toFloat()
     }
 
     @Command(value = "behindyou", description = "Open the BehindYou config GUI.")
