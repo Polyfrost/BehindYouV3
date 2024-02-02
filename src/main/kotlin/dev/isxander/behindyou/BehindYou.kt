@@ -64,6 +64,7 @@ object BehindYou {
         animation = if (realPerspective == 0) {
             if (mc.gameSettings.thirdPersonView != 0) {
                 mc.gameSettings.thirdPersonView = 0
+                mc.renderGlobal.setDisplayListEntitiesDirty()
             }
             DummyAnimation(if (isPatcher && PatcherConfig.parallaxFix) -0.05f else 0.1f)
         } else {
@@ -76,6 +77,7 @@ object BehindYou {
         if (animation.isFinished && animation.end == 0.3f) {
             mc.gameSettings.thirdPersonView = 0
             realPerspective = 0
+            mc.renderGlobal.setDisplayListEntitiesDirty()
         }
         return animation.get()
     }
@@ -181,11 +183,13 @@ object BehindYou {
             if (!BehindYouConfig.animation) {
                 mc.gameSettings.thirdPersonView = 0
                 realPerspective = 0
+                mc.renderGlobal.setDisplayListEntitiesDirty()
             }
         } else {
             end = distance
             mc.gameSettings.thirdPersonView = value
             realPerspective = value
+            mc.renderGlobal.setDisplayListEntitiesDirty()
             animation = DummyAnimation(0.3f)
         }
     }
