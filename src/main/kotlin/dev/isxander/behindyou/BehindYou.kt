@@ -61,18 +61,19 @@ object BehindYou {
     }
 
     fun level(): Float {
-        animation = if (realPerspective == 0) {
+        if (realPerspective == 0) {
             if (mc.gameSettings.thirdPersonView != 0) {
                 mc.gameSettings.thirdPersonView = 0
                 mc.renderGlobal.setDisplayListEntitiesDirty()
             }
-            DummyAnimation(if (isPatcher && PatcherConfig.parallaxFix) -0.05f else 0.1f)
+            animation = DummyAnimation(if (isPatcher && PatcherConfig.parallaxFix) -0.05f else 0.1f)
         } else {
             if (end != 0.3f) end = distance
             if (animation.get() > distance) {
-                DummyAnimation(distance)
-            } else
-                EaseOutQuart(if (BehindYouConfig.animation) 200 * abs(animation.get() - end) / BehindYouConfig.speed else 0f, animation.get(), end, false)
+                animation = DummyAnimation(distance)
+            } else if (animation.end != end) {
+                animation = EaseOutQuart(if (BehindYouConfig.animation) 100 * abs(animation.get() - end) / BehindYouConfig.speed else 0f, animation.get(), end, false)
+            }
         }
         if (animation.isFinished && animation.end == 0.3f) {
             mc.gameSettings.thirdPersonView = 0
