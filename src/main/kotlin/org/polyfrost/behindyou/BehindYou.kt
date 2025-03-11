@@ -1,5 +1,6 @@
 package org.polyfrost.behindyou
 
+import dev.deftu.omnicore.common.OmniLoader
 import net.minecraft.client.Minecraft
 import net.minecraftforge.fml.common.Mod
 import org.polyfrost.behindyou.config.BehindYouConfig
@@ -9,9 +10,9 @@ import org.polyfrost.polyui.animate.Animations
 import org.polyfrost.polyui.unit.seconds
 
 @Mod(
-    modid = "@ID@",
-    name = "@NAME@",
-    version = "@VER@",
+    modid = "@MOD_ID@",
+    name = "@MOD_NAME@",
+    version = "@MOD_VERSION@",
     clientSideOnly = true,
     modLanguageAdapter = "org.polyfrost.oneconfig.utils.v1.forge.KotlinLanguageAdapter"
 )
@@ -20,7 +21,9 @@ object BehindYou {
     const val BACK = 1
     const val FRONT = 2
 
-    private val isPatcher = Platform.loader().isModLoaded("patcher")
+    private val isPatcher by lazy {
+        OmniLoader.isModLoaded("patcher")
+    }
 
     var fov: Float
         get() = Minecraft.getMinecraft().gameSettings.fovSetting
