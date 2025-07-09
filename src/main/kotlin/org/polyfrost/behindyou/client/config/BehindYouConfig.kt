@@ -1,6 +1,7 @@
-package org.polyfrost.behindyou.config
+package org.polyfrost.behindyou.client.config
 
-import org.polyfrost.behindyou.BehindYou
+import org.polyfrost.behindyou.client.BehindYouClient
+import org.polyfrost.behindyou.client.PlayerPerspective
 import org.polyfrost.oneconfig.api.config.v1.Config
 import org.polyfrost.oneconfig.api.config.v1.annotations.*
 import org.polyfrost.oneconfig.api.ui.v1.keybind.KeybindManager
@@ -21,8 +22,12 @@ object BehindYouConfig : Config("behindyouv3.json", "/behindyou_dark.svg", "Behi
             // only listen to key down
             if (it) frontActive = !frontActive
         }
-        if (frontActive) BehindYou.perspective = BehindYou.FRONT
-        else BehindYou.previous()
+
+        if (frontActive) {
+            PlayerPerspective.currentPerspective = PlayerPerspective.FRONT
+        } else {
+            BehindYouClient.previous()
+        }
     }.build()
 
     @RadioButton(
@@ -42,8 +47,12 @@ object BehindYouConfig : Config("behindyouv3.json", "/behindyou_dark.svg", "Behi
             // only listen to key down
             if (it) backActive = !backActive
         }
-        if (backActive) BehindYou.perspective = BehindYou.BACK
-        else BehindYou.previous()
+
+        if (backActive) {
+            PlayerPerspective.currentPerspective = PlayerPerspective.BACK
+        } else {
+            BehindYouClient.previous()
+        }
     }.build()
 
     @RadioButton(
@@ -101,7 +110,7 @@ object BehindYouConfig : Config("behindyouv3.json", "/behindyou_dark.svg", "Behi
         addDependency("backFOV", "changeFOV")
         addDependency("frontFOV", "changeFOV")
         addCallback("animSpeed") { value: Float ->
-            BehindYou.modifyAnimations(value.seconds, Animations.EaseOutQuart)
+            BehindYouClient.modifyAnimations(value.seconds, Animations.EaseOutQuart)
             false
         }
 

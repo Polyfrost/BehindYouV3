@@ -1,30 +1,32 @@
 {
-  "schemaVersion": 1,
-  "id": "${mod_id}",
-  "name": "${mod_name}",
-  "version": "${mod_version}",
-  "description": "Look behind you with ease!",
-  "authors": [
-    "Polyfrost (isXander)"
-  ],
-  "contact": {
-    "homepage": "https://github.com/Polyfrost/BehindYouV3",
-    "sources": "https://github.com/Polyfrost/BehindYouV3",
-    "issues": "https://github.com/Polyfrost/BehindYouV3/issues"
-  },
-  "entrypoints": {
-    "client": [
-      {
-        "adapter": "kotlin",
-        "value": "org.polyfrost.behindyou.BehindYou::onInit"
-      }
-    ]
-  },
-  "license": "LGPL-3.0",
-  "environment": "client",
-  "depends": {
-    "onecore": "*",
-    "minecraft": "${mc_version}",
-    "java": ">=${java_version}"
-  }
+    "schemaVersion": 1,
+    "id": "${mod_id}",
+    "name": "${mod_name}",
+    "version": "${mod_version}",
+    "description": "Look behind you with ease!",
+    "authors": [
+        "Polyfrost",
+        "isXander"
+    ],
+    "contact": {
+        "homepage": "https://github.com/Polyfrost/BehindYouV3",
+        "sources": "https://github.com/Polyfrost/BehindYouV3",
+        "issues": "https://github.com/Polyfrost/BehindYouV3/issues"
+    },
+    "entrypoints": {
+        "client": [
+            {
+                "adapter": "kotlin",
+                "value": "org.polyfrost.behindyou.BehindYouEntrypoint"
+            }
+        ]
+    },
+    "mixins": [
+        "mixins.behindyouv3.json"
+    ],
+    "license": "LGPL-3.0",
+    "environment": "client",
+    "depends": {
+        "minecraft": "${mc_version}"
+    }
 }
