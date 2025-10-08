@@ -34,7 +34,6 @@ class BehindYouEntrypoint
 //$$     : ClientModInitializer
 //#endif
 {
-
     //#if FORGE && MC >= 1.16.5
     //$$ init {
     //$$     setupForgeEvents(FMLJavaModLoadingContext.get().modEventBus)
@@ -73,5 +72,4 @@ class BehindYouEntrypoint
     //$$     modEventBus.addListener(this::onInitializeClient)
     //$$ }
     //#endif
-
 }

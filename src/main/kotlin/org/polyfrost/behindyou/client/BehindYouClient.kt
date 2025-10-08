@@ -1,8 +1,9 @@
 package org.polyfrost.behindyou.client
 
-import dev.deftu.omnicore.client.OmniClient
-import dev.deftu.omnicore.common.OmniLoader
-import org.polyfrost.behindyou.client.config.BehindYouConfig
+import dev.deftu.omnicore.api.client.client
+import dev.deftu.omnicore.api.client.options.OmniPerspective
+import dev.deftu.omnicore.api.client.options.OmniVideoSettings
+import dev.deftu.omnicore.api.loader.OmniLoader
 import org.polyfrost.oneconfig.api.event.v1.eventHandler
 import org.polyfrost.oneconfig.api.event.v1.events.InitializationEvent
 import org.polyfrost.polyui.animate.Animation
@@ -10,50 +11,63 @@ import org.polyfrost.polyui.animate.Animations
 import org.polyfrost.polyui.unit.seconds
 
 object BehindYouClient {
-
     private val isPatcher by lazy {
-        OmniLoader.isModLoaded("patcher")
+        OmniLoader.isLoaded("patcher")
     }
 
     var fov: Float
-        get() {
-            return OmniClient.getInstance().gameSettings.fovSetting
-                //#if MC >= 1.19.2
-                //$$ .value.toFloat()
-                //#elseif MC >= 1.16.5
-                //$$ .toFloat()
-                //#endif
-        }
+        get() = OmniVideoSettings.fov.toFloat()
         set(value) {
             //#if MC >= 1.19.2
-            //$$ OmniClient.getInstance().options.fov.setValue(value.toInt())
+            //$$ client.options.fov.setValue(value.toInt())
             //#else
-            OmniClient.getInstance().gameSettings.fovSetting = value
+            client.gameSettings.fovSetting = value
                 //#if MC >= 1.16.5
                 //$$ .toDouble()
                 //#endif
             //#endif
         }
+
+    private var baselineFov = 0f
     private var initialFov = 0f
+    private var isFovActive = false
 
-    private var previousPerspective = PlayerPerspective.NORMAL
+    private var previousPerspective = OmniPerspective.FIRST_PERSON
 
-    private var zAnimation: Animation = Animations.EaseOutQuart.create(BehindYouConfig.animSpeed.seconds, 0f, 0f)
-    private var fovAnimation: Animation = Animations.EaseOutQuart.create(BehindYouConfig.animSpeed.seconds, initialFov, initialFov)
+    private lateinit var zAnimation: Animation
+    private lateinit var fovAnimation: Animation
 
-    @JvmStatic val isFinished get() = zAnimation.isFinished
+    @JvmStatic val isFinished: Boolean
+        get() {
+            setupAnimations()
+            return ::zAnimation.isInitialized && zAnimation.isFinished
+        }
 
     fun initialize() {
         BehindYouConfig.preload()
 
-        eventHandler<InitializationEvent> { initialFov = fov }
+        eventHandler<InitializationEvent> {
+            baselineFov = fov
+            initialFov = fov
+        }
     }
 
     @JvmStatic
     fun getLevel(zIn: Double, partialTicks: Float): Double {
-        if (!BehindYouConfig.enabled) return zIn
+        if (!BehindYouConfig.isEnabled) {
+            return zIn
+        }
+
+        setupAnimations()
         val deltaTime = partialTicks.toNanoseconds()
-        if (BehindYouConfig.changeFOV) fov = fovAnimation.update(deltaTime)
+        if (BehindYouConfig.isFovChanged && isFovActive) {
+            fov = fovAnimation.update(deltaTime)
+        } else {
+            if (OmniPerspective.currentPerspective == OmniPerspective.FIRST_PERSON) {
+                baselineFov = fov
+            }
+        }
+
         return zAnimation.update(deltaTime).toDouble()
     }
 
@@ -63,52 +77,83 @@ object BehindYouClient {
     }
 
     private fun setTargetLevel(z: Float, fov: Float) {
-        val animations = BehindYouConfig.useAnims
+        setupAnimations()
+
+        val animations = BehindYouConfig.isCameraAnimated
         zAnimation.to = z
         zAnimation.from = if (animations) zAnimation.value else z
         zAnimation.reset()
-        if (!BehindYouConfig.changeFOV) return
+        if (!BehindYouConfig.isFovChanged) return
         fovAnimation.to = fov
         fovAnimation.from = if (animations) fovAnimation.value else fov
         fovAnimation.reset()
     }
 
     @JvmStatic
-    fun updatePerspective(perspective: PlayerPerspective) {
-        val currentPerspective = PlayerPerspective.currentPerspective
-        val mc = OmniClient.getInstance()
-        val z: Float
-        val fov: Float
-        val config = BehindYouConfig
+    fun updatePerspective(perspective: OmniPerspective) {
+        val currentPerspective = OmniPerspective.currentPerspective
+        val (z, targetFov) = when (perspective) {
+            OmniPerspective.THIRD_PERSON_BACK -> {
+                if (currentPerspective == OmniPerspective.FIRST_PERSON) {
+                    baselineFov = fov
+                }
 
-        when (perspective) {
-            PlayerPerspective.BACK -> {
-                if (currentPerspective == PlayerPerspective.NORMAL) initialFov = this.fov
-                z = config.backDistance
-                fov = config.backFOV
+                BehindYouConfig.backDistance to BehindYouConfig.backFov
             }
 
-            PlayerPerspective.FRONT -> {
-                if (currentPerspective == PlayerPerspective.NORMAL) initialFov = this.fov
-                z = config.frontDistance
-                fov = config.frontFOV
+            OmniPerspective.THIRD_PERSON_FRONT -> {
+                if (currentPerspective == OmniPerspective.FIRST_PERSON) {
+                    baselineFov = fov
+                }
+
+                BehindYouConfig.frontDistance to BehindYouConfig.frontFov
             }
 
             else -> {
                 //#if MC <= 1.12.2
-                z = if (isPatcher && club.sk1er.patcher.config.PatcherConfig.parallaxFix) -0.05f else 0.1f
+                val zReset = if (isPatcher && club.sk1er.patcher.config.PatcherConfig.parallaxFix) -0.05f else 0.1f
                 //#else
-                //$$ z = 0.1f
+                //$$ val zReset = 0.1f
                 //#endif
-                fov = initialFov
+                zReset to baselineFov
             }
         }
 
-        setTargetLevel(z, fov)
-        mc.renderGlobal.setDisplayListEntitiesDirty()
-        val prev = currentPerspective
-        if (prev != perspective) previousPerspective = prev
+        setTargetLevel(z, targetFov)
+        if (perspective == OmniPerspective.FIRST_PERSON) {
+            if (BehindYouConfig.isFovChanged) {
+                fov = baselineFov
+            }
+
+            isFovActive = false
+            fovAnimation.to = baselineFov
+            fovAnimation.from = baselineFov
+            fovAnimation.reset()
+        } else {
+            isFovActive = BehindYouConfig.isFovChanged
+            if (isFovActive) {
+                fovAnimation.from = fov
+                fovAnimation.to = targetFov
+                fovAnimation.reset()
+            }
+        }
+
+        client.renderGlobal.setDisplayListEntitiesDirty()
+        if (currentPerspective != perspective) {
+            previousPerspective = currentPerspective
+        }
+
         perspective.apply()
+    }
+
+    private fun setupAnimations() {
+        if (!::zAnimation.isInitialized) {
+            zAnimation = Animations.EaseOutQuart.create(BehindYouConfig.animSpeed.seconds, 0f, 0f)
+        }
+
+        if (!::fovAnimation.isInitialized) {
+            fovAnimation = Animations.EaseOutQuart.create(BehindYouConfig.animSpeed.seconds, initialFov, initialFov)
+        }
     }
 
     fun previous() {
@@ -116,6 +161,7 @@ object BehindYouClient {
     }
 
     // partial ticks are a fraction (0..1) of a tick, which is 50ms.
-    private fun Float.toNanoseconds() = (this * 50_000_000f).toLong()
-
+    private fun Float.toNanoseconds(): Long {
+        return (this * 50_000_000f).toLong()
+    }
 }
