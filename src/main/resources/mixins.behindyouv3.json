@@ -2,13 +2,12 @@
     "minVersion": "0.7",
     "package": "org.polyfrost.behindyou.mixin",
     "refmap": "mixins.behindyouv3.refmap.json",
-    "plugin": "org.polyfrost.behindyou.BehindYouMixinPlugin",
     "injectors": {
         "maxShiftBy": 5
     },
     "verbose": true,
     "client": [
-        "client.Mixin_EntityRenderer_SetFOVLevel",
-        "client.Mixin_Minecraft_CapturePOVSet"
+		"client.Mixin_AdjustLevel",
+		"client.Mixin_CapturePOVSet"
     ]
 }

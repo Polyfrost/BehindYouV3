@@ -1,5 +1,6 @@
 package org.polyfrost.behindyou.client
 
+import dev.deftu.omnicore.api.client.client
 import dev.deftu.omnicore.api.client.input.OmniKeys
 import dev.deftu.omnicore.api.client.options.OmniPerspective
 import org.polyfrost.oneconfig.api.config.v1.Config

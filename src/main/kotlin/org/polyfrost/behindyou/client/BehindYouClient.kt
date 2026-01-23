@@ -3,7 +3,6 @@ package org.polyfrost.behindyou.client
 import dev.deftu.omnicore.api.client.client
 import dev.deftu.omnicore.api.client.options.OmniPerspective
 import dev.deftu.omnicore.api.client.options.OmniVideoSettings
-import dev.deftu.omnicore.api.loader.OmniLoader
 import org.polyfrost.oneconfig.api.event.v1.eventHandler
 import org.polyfrost.oneconfig.api.event.v1.events.InitializationEvent
 import org.polyfrost.polyui.animate.Animation
@@ -11,21 +10,10 @@ import org.polyfrost.polyui.animate.Animations
 import org.polyfrost.polyui.unit.seconds
 
 object BehindYouClient {
-    private val isPatcher by lazy {
-        OmniLoader.isLoaded("patcher")
-    }
-
     var fov: Float
         get() = OmniVideoSettings.fov.toFloat()
         set(value) {
-            //#if MC >= 1.19.2
-            //$$ client.options.fov.setValue(value.toInt())
-            //#else
-            client.gameSettings.fovSetting = value
-                //#if MC >= 1.16.5
-                //$$ .toDouble()
-                //#endif
-            //#endif
+            client.options.fov().set(value.toInt())
         }
 
     private var baselineFov = 0f
@@ -110,11 +98,7 @@ object BehindYouClient {
             }
 
             else -> {
-                //#if MC <= 1.12.2
-                val zReset = if (isPatcher && club.sk1er.patcher.config.PatcherConfig.parallaxFix) -0.05f else 0.1f
-                //#else
-                //$$ val zReset = 0.1f
-                //#endif
+                val zReset = 0.1f
                 zReset to baselineFov
             }
         }
@@ -138,7 +122,6 @@ object BehindYouClient {
             }
         }
 
-        client.renderGlobal.setDisplayListEntitiesDirty()
         if (currentPerspective != perspective) {
             previousPerspective = currentPerspective
         }
