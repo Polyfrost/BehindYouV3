@@ -20,7 +20,9 @@ object BehindYouClient {
     private var initialFov = 0f
     private var isFovActive = false
 
-    private var previousPerspective = OmniPerspective.FIRST_PERSON
+    @get:JvmStatic
+    var previousPerspective = OmniPerspective.FIRST_PERSON
+        private set
 
     private lateinit var zAnimation: Animation
     private lateinit var fovAnimation: Animation
@@ -57,7 +59,9 @@ object BehindYouClient {
 
     fun modifyAnimations(duration: Long, curve: Animations) {
         zAnimation = curve.create(duration, zAnimation.value, zAnimation.to)
+        zAnimation.finishNow()
         fovAnimation = curve.create(duration, fovAnimation.value, fovAnimation.to)
+        fovAnimation.finishNow()
     }
 
     private fun setTargetLevel(z: Float, fov: Float) {
@@ -94,7 +98,7 @@ object BehindYouClient {
             }
 
             else -> {
-                val zReset = 0.1f
+                val zReset = 0.3f
                 zReset to baselineFov
             }
         }
@@ -128,10 +132,12 @@ object BehindYouClient {
     private fun setupAnimations() {
         if (!::zAnimation.isInitialized) {
             zAnimation = Animations.EaseOutQuart.create(BehindYouConfig.animSpeed.seconds, 0f, 0f)
+            zAnimation.finishNow()
         }
 
         if (!::fovAnimation.isInitialized) {
             fovAnimation = Animations.EaseOutQuart.create(BehindYouConfig.animSpeed.seconds, initialFov, initialFov)
+            fovAnimation.finishNow()
         }
     }
 
