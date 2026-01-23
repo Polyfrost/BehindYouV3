@@ -13,10 +13,12 @@ import org.spongepowered.asm.mixin.injection.At;
 public class Mixin_AdjustLevel {
     @WrapOperation(method = "setup", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getMaxZoom(F)F"))
     private float adjustLevel(Camera instance, float zoom, Operation<Float> original) {
+        float maxZoom = original.call(instance, zoom);
+
         if (BehindYouConfig.INSTANCE.isEnabled()) {
-            return (float) BehindYouClient.getLevel(zoom, OmniRenderTicks.get());
+            return (float) BehindYouClient.getLevel(maxZoom, OmniRenderTicks.get());
         } else {
-            return original.call(instance, zoom);
+            return maxZoom;
         }
     }
 }

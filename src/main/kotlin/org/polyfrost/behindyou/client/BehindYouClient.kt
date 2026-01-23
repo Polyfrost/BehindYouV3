@@ -42,10 +42,6 @@ object BehindYouClient {
 
     @JvmStatic
     fun getLevel(zIn: Double, partialTicks: Float): Double {
-        if (!BehindYouConfig.isEnabled) {
-            return zIn
-        }
-
         setupAnimations()
         val deltaTime = partialTicks.toNanoseconds()
         if (BehindYouConfig.isFovChanged && isFovActive) {
@@ -56,7 +52,7 @@ object BehindYouClient {
             }
         }
 
-        return zAnimation.update(deltaTime).toDouble()
+        return zAnimation.update(deltaTime).toDouble().coerceAtMost(zIn)
     }
 
     fun modifyAnimations(duration: Long, curve: Animations) {
