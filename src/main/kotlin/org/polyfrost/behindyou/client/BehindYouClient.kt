@@ -81,7 +81,7 @@ object BehindYouClient {
     fun updatePerspective(perspective: OmniPerspective) {
         val currentPerspective = OmniPerspective.currentPerspective
         val (z, targetFov) = when (perspective) {
-            OmniPerspective.THIRD_PERSON_BACK -> {
+            OmniPerspective.THIRD_PERSON_FRONT -> {
                 if (currentPerspective == OmniPerspective.FIRST_PERSON) {
                     baselineFov = fov
                 }
@@ -89,7 +89,7 @@ object BehindYouClient {
                 BehindYouConfig.backDistance to BehindYouConfig.backFov
             }
 
-            OmniPerspective.THIRD_PERSON_FRONT -> {
+            OmniPerspective.THIRD_PERSON_BACK -> {
                 if (currentPerspective == OmniPerspective.FIRST_PERSON) {
                     baselineFov = fov
                 }

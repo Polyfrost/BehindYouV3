@@ -39,7 +39,7 @@ object BehindYouConfig : Config(
         }
 
         if (isFrontViewActive) {
-            BehindYouClient.updatePerspective(OmniPerspective.THIRD_PERSON_FRONT)
+            BehindYouClient.updatePerspective(OmniPerspective.THIRD_PERSON_BACK)
         } else {
             BehindYouClient.previous()
         }
@@ -61,7 +61,7 @@ object BehindYouConfig : Config(
         }
 
         if (isBackViewActive) {
-            BehindYouClient.updatePerspective(OmniPerspective.THIRD_PERSON_BACK)
+            BehindYouClient.updatePerspective(OmniPerspective.THIRD_PERSON_FRONT)
         } else {
             BehindYouClient.previous()
         }
