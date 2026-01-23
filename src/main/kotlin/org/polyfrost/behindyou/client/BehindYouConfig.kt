@@ -28,9 +28,14 @@ object BehindYouConfig : Config(
 
     @Keybind(title = "Front View KeyBind")
     var frontKeybind = KeybindHelper.builder().keys(OmniKeys.KEY_Y.code).does { isDown ->
+        if (client.screen != null) return@does
+
         when (frontKeybindToggleMode) {
             ToggleKeybind.Hold -> isFrontViewActive = isDown
-            ToggleKeybind.Toggle -> if (isDown) isFrontViewActive = !isFrontViewActive
+            ToggleKeybind.Toggle -> {
+                if (!isDown) return@does
+                isFrontViewActive = !isFrontViewActive
+            }
         }
 
         if (isFrontViewActive) {
@@ -45,9 +50,14 @@ object BehindYouConfig : Config(
 
     @Keybind(title = "Back View KeyBind")
     var backKeybind = KeybindHelper.builder().keys(OmniKeys.KEY_U.code).does { isDown ->
+        if (client.screen != null) return@does
+
         when (backKeybindToggleMode) {
             ToggleKeybind.Hold -> isBackViewActive = isDown
-            ToggleKeybind.Toggle -> if (isDown) isBackViewActive = !isBackViewActive
+            ToggleKeybind.Toggle -> {
+                if (!isDown) return@does
+                isBackViewActive = !isBackViewActive
+            }
         }
 
         if (isBackViewActive) {
