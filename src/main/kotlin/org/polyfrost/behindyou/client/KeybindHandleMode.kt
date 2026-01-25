@@ -1,6 +1,6 @@
 package org.polyfrost.behindyou.client
 
-enum class ToggleKeybind {
+enum class KeybindHandleMode {
     Hold,
     Toggle
 }

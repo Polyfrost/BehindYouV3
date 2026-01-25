@@ -3,6 +3,7 @@ package org.polyfrost.behindyou.client
 import dev.deftu.omnicore.api.client.client
 import dev.deftu.omnicore.api.client.input.OmniKeys
 import dev.deftu.omnicore.api.client.options.OmniPerspective
+import org.polyfrost.behindyou.BehindYouConstants
 import org.polyfrost.oneconfig.api.config.v1.Config
 import org.polyfrost.oneconfig.api.config.v1.annotations.Checkbox
 import org.polyfrost.oneconfig.api.config.v1.annotations.Keybind
@@ -15,56 +16,44 @@ import org.polyfrost.polyui.input.KeybindHelper
 import org.polyfrost.polyui.unit.seconds
 
 object BehindYouConfig : Config(
-    "behindyouv3.json",
+    "${BehindYouConstants.ID}.json",
     "/assets/behindyouv3/behindyou_dark.svg",
-    "BehindYouV3",
+    BehindYouConstants.NAME,
     Category.QOL
 ) {
     @Switch(title = "Enable BehindYou")
     var isEnabled = true
 
     @RadioButton(title = "Front View KeyBind Handle Mode")
-    var frontKeybindToggleMode = ToggleKeybind.Hold
+    var frontKeybindHandleMode = KeybindHandleMode.Hold
 
     @Keybind(title = "Front View KeyBind")
     var frontKeybind = KeybindHelper.builder().keys(OmniKeys.KEY_Y.code).does { isDown ->
         if (!isEnabled || client.screen != null) return@does
+        if (frontKeybindHandleMode == KeybindHandleMode.Toggle && !isDown) return@does
 
-        when (frontKeybindToggleMode) {
-            ToggleKeybind.Hold -> isFrontViewActive = isDown
-            ToggleKeybind.Toggle -> {
-                if (!isDown) return@does
-                isFrontViewActive = !isFrontViewActive
-            }
+        val perspective = when {
+            frontKeybindHandleMode == KeybindHandleMode.Hold && !isDown -> OmniPerspective.FIRST_PERSON
+            OmniPerspective.currentPerspective == OmniPerspective.THIRD_PERSON_BACK -> OmniPerspective.FIRST_PERSON
+            else -> OmniPerspective.THIRD_PERSON_BACK
         }
-
-        if (isFrontViewActive) {
-            BehindYouClient.updatePerspective(OmniPerspective.THIRD_PERSON_BACK)
-        } else {
-            BehindYouClient.previous()
-        }
+        BehindYouClient.updatePerspective(perspective)
     }.build()
 
     @RadioButton(title = "Back View KeyBind Handle Mode")
-    var backKeybindToggleMode = ToggleKeybind.Hold
+    var backKeybindHandleMode = KeybindHandleMode.Hold
 
     @Keybind(title = "Back View KeyBind")
     var backKeybind = KeybindHelper.builder().keys(OmniKeys.KEY_U.code).does { isDown ->
         if (!isEnabled || client.screen != null) return@does
+        if (backKeybindHandleMode == KeybindHandleMode.Toggle && !isDown) return@does
 
-        when (backKeybindToggleMode) {
-            ToggleKeybind.Hold -> isBackViewActive = isDown
-            ToggleKeybind.Toggle -> {
-                if (!isDown) return@does
-                isBackViewActive = !isBackViewActive
-            }
+        val perspective = when {
+            backKeybindHandleMode == KeybindHandleMode.Hold && !isDown -> OmniPerspective.FIRST_PERSON
+            OmniPerspective.currentPerspective == OmniPerspective.THIRD_PERSON_FRONT -> OmniPerspective.FIRST_PERSON
+            else -> OmniPerspective.THIRD_PERSON_FRONT
         }
-
-        if (isBackViewActive) {
-            BehindYouClient.updatePerspective(OmniPerspective.THIRD_PERSON_FRONT)
-        } else {
-            BehindYouClient.previous()
-        }
+        BehindYouClient.updatePerspective(perspective)
     }.build()
 
     @Checkbox(title = "Camera Animations")

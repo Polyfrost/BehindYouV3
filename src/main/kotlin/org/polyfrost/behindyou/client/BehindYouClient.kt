@@ -20,8 +20,7 @@ object BehindYouClient {
     private var initialFov = 0f
     private var isFovActive = false
 
-    @get:JvmStatic
-    var previousPerspective = OmniPerspective.FIRST_PERSON
+    @get:JvmStatic var previousPerspective = OmniPerspective.FIRST_PERSON
         private set
 
     private lateinit var zAnimation: Animation
@@ -54,7 +53,13 @@ object BehindYouClient {
             }
         }
 
-        return zAnimation.update(deltaTime).toDouble().coerceAtMost(zIn)
+        val level = zAnimation.update(deltaTime).toDouble().coerceAtMost(zIn)
+        // make animation finish a little more smoothly when going back to first person
+        if (zAnimation.from > 0.4f && zAnimation.to <= 0.4f && level <= 0.4f) {
+            zAnimation.finishNow()
+        }
+
+        return level
     }
 
     fun modifyAnimations(duration: Long, curve: Animations) {
@@ -80,9 +85,11 @@ object BehindYouClient {
     @JvmStatic
     fun updatePerspective(perspective: OmniPerspective) {
         val currentPerspective = OmniPerspective.currentPerspective
+        if (currentPerspective == perspective) return
+
         val (z, targetFov) = when (perspective) {
             OmniPerspective.THIRD_PERSON_FRONT -> {
-                if (currentPerspective == OmniPerspective.FIRST_PERSON) {
+                if (currentPerspective.isFirstPerson) {
                     baselineFov = fov
                 }
 
@@ -90,7 +97,7 @@ object BehindYouClient {
             }
 
             OmniPerspective.THIRD_PERSON_BACK -> {
-                if (currentPerspective == OmniPerspective.FIRST_PERSON) {
+                if (currentPerspective.isFirstPerson) {
                     baselineFov = fov
                 }
 
@@ -104,7 +111,7 @@ object BehindYouClient {
         }
 
         setTargetLevel(z, targetFov)
-        if (perspective == OmniPerspective.FIRST_PERSON) {
+        if (perspective.isFirstPerson) {
             if (BehindYouConfig.isFovChanged) {
                 fov = baselineFov
             }
@@ -114,6 +121,11 @@ object BehindYouClient {
             fovAnimation.from = baselineFov
             fovAnimation.reset()
         } else {
+            if (BehindYouConfig.isCameraAnimated && currentPerspective.isThirdPerson) {
+                zAnimation.from = 0.3f
+                zAnimation.reset()
+            }
+
             isFovActive = BehindYouConfig.isFovChanged
             if (isFovActive) {
                 fovAnimation.from = fov
@@ -122,16 +134,13 @@ object BehindYouClient {
             }
         }
 
-        if (currentPerspective != perspective) {
-            previousPerspective = currentPerspective
-        }
-
+        previousPerspective = currentPerspective
         perspective.apply()
     }
 
     private fun setupAnimations() {
         if (!::zAnimation.isInitialized) {
-            zAnimation = Animations.EaseOutQuart.create(BehindYouConfig.animSpeed.seconds, 0f, 0f)
+            zAnimation = Animations.EaseOutQuart.create(BehindYouConfig.animSpeed.seconds, 0.3f, 0f)
             zAnimation.finishNow()
         }
 
@@ -139,10 +148,6 @@ object BehindYouClient {
             fovAnimation = Animations.EaseOutQuart.create(BehindYouConfig.animSpeed.seconds, initialFov, initialFov)
             fovAnimation.finishNow()
         }
-    }
-
-    fun previous() {
-        updatePerspective(previousPerspective)
     }
 
     // partial ticks are a fraction (0..1) of a tick, which is 50ms.

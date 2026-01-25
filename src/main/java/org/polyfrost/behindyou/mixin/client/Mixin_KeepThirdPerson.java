@@ -1,6 +1,7 @@
 package org.polyfrost.behindyou.mixin.client;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import dev.deftu.omnicore.api.client.options.OmniPerspective;
 import net.minecraft.client.CameraType;
 import org.polyfrost.behindyou.client.BehindYouClient;
 import org.polyfrost.behindyou.client.BehindYouConfig;
@@ -20,10 +21,13 @@ public class Mixin_KeepThirdPerson {
 
     @ModifyReturnValue(method = "isMirrored", at = @At("RETURN"))
     private boolean keepMirrored(boolean isMirrored) {
-        if (BehindYouConfig.INSTANCE.isEnabled() && BehindYouConfig.INSTANCE.isCameraAnimated()) {
-            return !BehindYouClient.isFinished() && BehindYouClient.getPreviousPerspective().isFrontView() || isMirrored;
-        } else {
+        if (!BehindYouConfig.INSTANCE.isEnabled() || !BehindYouConfig.INSTANCE.isCameraAnimated()) {
             return isMirrored;
         }
+
+        boolean isAnimating = !BehindYouClient.isFinished()
+                && BehindYouClient.getPreviousPerspective().isFrontView()
+                && OmniPerspective.getCurrentPerspective().isFirstPerson();
+        return isAnimating || isMirrored;
     }
 }
