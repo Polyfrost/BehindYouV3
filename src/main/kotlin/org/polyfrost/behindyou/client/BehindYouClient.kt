@@ -18,7 +18,6 @@ object BehindYouClient {
 
     private var baselineFov = 0f
     private var initialFov = 0f
-    private var isFovActive = false
 
     @get:JvmStatic var previousPerspective = OmniPerspective.FIRST_PERSON
         private set
@@ -47,37 +46,14 @@ object BehindYouClient {
     fun getLevel(zIn: Double): Double {
         setupAnimations()
         val currentTime = System.nanoTime()
-        if (BehindYouConfig.isFovChanged && isFovActive) {
+
+        if (BehindYouConfig.isFovChanged) {
             fov = fovAnimation.update(currentTime - fovAnimationStartTime)
-        } else {
-            if (OmniPerspective.currentPerspective == OmniPerspective.FIRST_PERSON) {
-                baselineFov = fov
-            }
+        } else if (OmniPerspective.currentPerspective == OmniPerspective.FIRST_PERSON) {
+            baselineFov = fov
         }
 
         return zAnimation.update(currentTime - zAnimationStartTime).toDouble().coerceAtMost(zIn)
-    }
-
-    fun modifyAnimations(duration: Long, curve: Animations) {
-        zAnimation = curve.create(duration, zAnimation.value, zAnimation.to)
-        zAnimation.finishNow()
-        fovAnimation = curve.create(duration, fovAnimation.value, fovAnimation.to)
-        fovAnimation.finishNow()
-    }
-
-    private fun setTargetLevel(z: Float, fov: Float) {
-        setupAnimations()
-
-        val animations = BehindYouConfig.isCameraAnimated
-        zAnimation.to = z
-        zAnimation.from = if (animations) zAnimation.value else z
-        zAnimationStartTime = System.nanoTime()
-        zAnimation.reset()
-        if (!BehindYouConfig.isFovChanged) return
-        fovAnimation.to = fov
-        fovAnimation.from = if (animations) fovAnimation.value else fov
-        fovAnimationStartTime = System.nanoTime()
-        fovAnimation.reset()
     }
 
     @JvmStatic
@@ -109,34 +85,32 @@ object BehindYouClient {
         }
 
         setTargetLevel(z, targetFov)
-        if (perspective.isFirstPerson) {
-            if (BehindYouConfig.isFovChanged) {
-                fov = baselineFov
-            }
-
-            isFovActive = false
-            fovAnimation.to = baselineFov
-            fovAnimation.from = baselineFov
-            fovAnimationStartTime = System.nanoTime()
-            fovAnimation.reset()
-        } else {
-            if (BehindYouConfig.isCameraAnimated && currentPerspective.isThirdPerson) {
-                zAnimation.from = 0.3f
-                zAnimationStartTime = System.nanoTime()
-                zAnimation.reset()
-            }
-
-            isFovActive = BehindYouConfig.isFovChanged
-            if (isFovActive) {
-                fovAnimation.from = fov
-                fovAnimation.to = targetFov
-                fovAnimationStartTime = System.nanoTime()
-                fovAnimation.reset()
-            }
+        if (BehindYouConfig.isCameraAnimated && currentPerspective.isThirdPerson && perspective.isThirdPerson) {
+            zAnimation.from = 0.3f
+            zAnimationStartTime = System.nanoTime()
+            zAnimation.reset()
         }
 
         previousPerspective = currentPerspective
         perspective.apply()
+    }
+
+    private fun setTargetLevel(z: Float, fov: Float) {
+        setupAnimations()
+        val animations = BehindYouConfig.isCameraAnimated
+
+        zAnimation.to = z
+        zAnimation.from = if (animations) zAnimation.value else z
+        zAnimationStartTime = System.nanoTime()
+        zAnimation.reset()
+
+        if (!BehindYouConfig.isFovChanged) return
+
+        if (!animations) this.fov = fov
+        fovAnimation.to = fov
+        fovAnimation.from = if (animations) fovAnimation.value else fov
+        fovAnimationStartTime = System.nanoTime()
+        fovAnimation.reset()
     }
 
     private fun setupAnimations() {
@@ -149,5 +123,12 @@ object BehindYouClient {
             fovAnimation = Animations.EaseOutQuart.create(BehindYouConfig.animSpeed.seconds, initialFov, initialFov)
             fovAnimation.finishNow()
         }
+    }
+
+    fun modifyAnimations(duration: Long, curve: Animations) {
+        zAnimation = curve.create(duration, zAnimation.value, zAnimation.to)
+        zAnimation.finishNow()
+        fovAnimation = curve.create(duration, fovAnimation.value, fovAnimation.to)
+        fovAnimation.finishNow()
     }
 }
