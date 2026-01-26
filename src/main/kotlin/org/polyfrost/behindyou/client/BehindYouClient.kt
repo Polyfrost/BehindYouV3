@@ -25,6 +25,8 @@ object BehindYouClient {
 
     private lateinit var zAnimation: Animation
     private lateinit var fovAnimation: Animation
+    private var zAnimationStartTime = 0L
+    private var fovAnimationStartTime = 0L
 
     @JvmStatic val isFinished: Boolean
         get() {
@@ -42,24 +44,18 @@ object BehindYouClient {
     }
 
     @JvmStatic
-    fun getLevel(zIn: Double, partialTicks: Float): Double {
+    fun getLevel(zIn: Double): Double {
         setupAnimations()
-        val deltaTime = partialTicks.toNanoseconds()
+        val currentTime = System.nanoTime()
         if (BehindYouConfig.isFovChanged && isFovActive) {
-            fov = fovAnimation.update(deltaTime)
+            fov = fovAnimation.update(currentTime - fovAnimationStartTime)
         } else {
             if (OmniPerspective.currentPerspective == OmniPerspective.FIRST_PERSON) {
                 baselineFov = fov
             }
         }
 
-        val level = zAnimation.update(deltaTime).toDouble().coerceAtMost(zIn)
-        // make animation finish a little more smoothly when going back to first person
-        if (zAnimation.from > 0.4f && zAnimation.to <= 0.4f && level <= 0.4f) {
-            zAnimation.finishNow()
-        }
-
-        return level
+        return zAnimation.update(currentTime - zAnimationStartTime).toDouble().coerceAtMost(zIn)
     }
 
     fun modifyAnimations(duration: Long, curve: Animations) {
@@ -75,10 +71,12 @@ object BehindYouClient {
         val animations = BehindYouConfig.isCameraAnimated
         zAnimation.to = z
         zAnimation.from = if (animations) zAnimation.value else z
+        zAnimationStartTime = System.nanoTime()
         zAnimation.reset()
         if (!BehindYouConfig.isFovChanged) return
         fovAnimation.to = fov
         fovAnimation.from = if (animations) fovAnimation.value else fov
+        fovAnimationStartTime = System.nanoTime()
         fovAnimation.reset()
     }
 
@@ -119,10 +117,12 @@ object BehindYouClient {
             isFovActive = false
             fovAnimation.to = baselineFov
             fovAnimation.from = baselineFov
+            fovAnimationStartTime = System.nanoTime()
             fovAnimation.reset()
         } else {
             if (BehindYouConfig.isCameraAnimated && currentPerspective.isThirdPerson) {
                 zAnimation.from = 0.3f
+                zAnimationStartTime = System.nanoTime()
                 zAnimation.reset()
             }
 
@@ -130,6 +130,7 @@ object BehindYouClient {
             if (isFovActive) {
                 fovAnimation.from = fov
                 fovAnimation.to = targetFov
+                fovAnimationStartTime = System.nanoTime()
                 fovAnimation.reset()
             }
         }
@@ -148,10 +149,5 @@ object BehindYouClient {
             fovAnimation = Animations.EaseOutQuart.create(BehindYouConfig.animSpeed.seconds, initialFov, initialFov)
             fovAnimation.finishNow()
         }
-    }
-
-    // partial ticks are a fraction (0..1) of a tick, which is 50ms.
-    private fun Float.toNanoseconds(): Long {
-        return (this * 50_000_000f).toLong()
     }
 }

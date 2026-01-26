@@ -2,7 +2,6 @@ package org.polyfrost.behindyou.mixin.client;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import dev.deftu.omnicore.api.client.render.OmniRenderTicks;
 import net.minecraft.client.Camera;
 import org.polyfrost.behindyou.client.BehindYouClient;
 import org.polyfrost.behindyou.client.BehindYouConfig;
@@ -16,7 +15,7 @@ public class Mixin_AdjustLevel {
         float maxZoom = original.call(instance, zoom);
 
         if (BehindYouConfig.INSTANCE.isEnabled()) {
-            return (float) BehindYouClient.getLevel(maxZoom, OmniRenderTicks.get());
+            return (float) BehindYouClient.getLevel(maxZoom);
         } else {
             return maxZoom;
         }
