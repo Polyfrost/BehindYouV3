@@ -5,6 +5,8 @@ import dev.deftu.omnicore.api.client.input.OmniKeys
 import dev.deftu.omnicore.api.client.options.OmniPerspective
 import org.polyfrost.behindyou.BehindYouConstants
 import org.polyfrost.oneconfig.api.config.v1.Config
+import org.polyfrost.oneconfig.api.config.v1.annotations.Accordion
+import org.polyfrost.oneconfig.api.config.v1.annotations.Include
 import org.polyfrost.oneconfig.api.config.v1.annotations.Keybind
 import org.polyfrost.oneconfig.api.config.v1.annotations.RadioButton
 import org.polyfrost.oneconfig.api.config.v1.annotations.Slider
@@ -23,69 +25,82 @@ object BehindYouConfig : Config(
     @Switch(title = "Enable BehindYou", description = "Master switch to enable/disable the mod")
     var isEnabled = true
 
-    @Keybind(title = "Back View Keybind")
-    var backKeybind = KeybindHelper.builder().keys(OmniKeys.KEY_NONE.code).does { isDown ->
-        if (!isEnabled || client.screen != null) return@does
-        if (backKeybindHandleMode == KeybindHandleMode.Toggle && !isDown) return@does
+    @Accordion(title = "Keybinds", subcategory = "Keybind Settings", index = 0)
+    object Keybinds {
+        @Keybind(title = "Back View Keybind")
+        var backKeybind = KeybindHelper.builder().keys(OmniKeys.KEY_NONE.code).does { isDown ->
+            if (!isEnabled || client.screen != null) return@does
+            if (backKeybindHandleMode == KeybindHandleMode.Toggle && !isDown) return@does
 
-        val perspective = when {
-            backKeybindHandleMode == KeybindHandleMode.Hold && !isDown -> OmniPerspective.FIRST_PERSON
-            OmniPerspective.currentPerspective == OmniPerspective.THIRD_PERSON_FRONT -> OmniPerspective.FIRST_PERSON
-            else -> OmniPerspective.THIRD_PERSON_FRONT
-        }
-        BehindYouClient.updatePerspective(perspective)
-    }.build()
+            val perspective = when {
+                backKeybindHandleMode == KeybindHandleMode.Hold && !isDown -> OmniPerspective.FIRST_PERSON
+                OmniPerspective.currentPerspective == OmniPerspective.THIRD_PERSON_FRONT -> OmniPerspective.FIRST_PERSON
+                else -> OmniPerspective.THIRD_PERSON_FRONT
+            }
+            BehindYouClient.updatePerspective(perspective)
+        }.build()
 
-    @RadioButton(title = "Back View Keybind Handle Mode")
-    var backKeybindHandleMode = KeybindHandleMode.Hold
+        @RadioButton(title = "Back View Handle Mode")
+        var backKeybindHandleMode = KeybindHandleMode.Hold
 
-    @Keybind(title = "Front View Keybind")
-    var frontKeybind = KeybindHelper.builder().keys(OmniKeys.KEY_NONE.code).does { isDown ->
-        if (!isEnabled || client.screen != null) return@does
-        if (frontKeybindHandleMode == KeybindHandleMode.Toggle && !isDown) return@does
+        @Keybind(title = "Front View Keybind")
+        var frontKeybind = KeybindHelper.builder().keys(OmniKeys.KEY_NONE.code).does { isDown ->
+            if (!isEnabled || client.screen != null) return@does
+            if (frontKeybindHandleMode == KeybindHandleMode.Toggle && !isDown) return@does
 
-        val perspective = when {
-            frontKeybindHandleMode == KeybindHandleMode.Hold && !isDown -> OmniPerspective.FIRST_PERSON
-            OmniPerspective.currentPerspective == OmniPerspective.THIRD_PERSON_BACK -> OmniPerspective.FIRST_PERSON
-            else -> OmniPerspective.THIRD_PERSON_BACK
-        }
-        BehindYouClient.updatePerspective(perspective)
-    }.build()
+            val perspective = when {
+                frontKeybindHandleMode == KeybindHandleMode.Hold && !isDown -> OmniPerspective.FIRST_PERSON
+                OmniPerspective.currentPerspective == OmniPerspective.THIRD_PERSON_BACK -> OmniPerspective.FIRST_PERSON
+                else -> OmniPerspective.THIRD_PERSON_BACK
+            }
+            BehindYouClient.updatePerspective(perspective)
+        }.build()
 
-    @RadioButton(title = "Front View Keybind Handle Mode")
-    var frontKeybindHandleMode = KeybindHandleMode.Hold
+        @RadioButton(title = "Front View Handle Mode")
+        var frontKeybindHandleMode = KeybindHandleMode.Hold
+    }
 
-    @Switch(title = "Camera Animations")
-    var isCameraAnimated = true
+    @Accordion(title = "Animation Settings", description = "Animate the camera between perspectives", subcategory = "Camera Settings", index = 1)
+    object Animation {
+        @Include
+        var enabled = true
 
-    @Slider(title = "Animation Time (secs)", min = 0.1f, max = 2f)
-    var animSpeed = 1f
+        @Slider(title = "Animation Time (secs)", min = 0.1f, max = 2f)
+        var speed = 1f
+    }
 
-    @Switch(title = "Modify FOV")
-    var isFovChanged = true
+    @Accordion(title = "FOV Settings", description = "Modify your field of view", subcategory = "Camera Settings", index = 2)
+    object Fov {
+        @Include
+        var enabled = true
 
-    @Slider(title = "Back View FOV", min = 30F, max = 110F)
-    var backFov = 90f
+        @Slider(title = "Back View FOV", min = 30F, max = 110F)
+        var back = 90f
 
-    @Slider(title = "Front View FOV", min = 30F, max = 110F)
-    var frontFov = 90f
+        @Slider(title = "Front View FOV", min = 30F, max = 110F)
+        var front = 90f
+    }
 
-    @Slider(title = "Back View Distance", min = 1f, max = 4f)
-    var backDistance = 4f
+    @Accordion(title = "Distance Settings", description = "Modify your camera distance", subcategory = "Camera Settings", index = 3)
+    object Distance {
+        @Slider(title = "Back View Distance", min = 1f, max = 4f)
+        var back = 4f
 
-    @Slider(title = "Front View Distance", min = 1f, max = 4f)
-    var frontDistance = 4f
+        @Slider(title = "Front View Distance", min = 1f, max = 4f)
+        var front = 4f
+    }
 
     init {
-        addDependency("animSpeed", "isCameraAnimated")
-        addDependency("backFov", "isFovChanged")
-        addDependency("frontFov", "isFovChanged")
-        addCallback("animSpeed") { value: Float ->
+        addDependency("Animation.speed", "Animation.enabled")
+        addCallback("Animation.speed") { value: Float ->
             BehindYouClient.modifyAnimations(value.seconds, Animations.EaseOutQuart)
             false
         }
 
-        KeybindManager.registerKeybind(backKeybind)
-        KeybindManager.registerKeybind(frontKeybind)
+        addDependency("Fov.back", "Fov.enabled")
+        addDependency("Fov.front", "Fov.enabled")
+
+        KeybindManager.registerKeybind(Keybinds.backKeybind)
+        KeybindManager.registerKeybind(Keybinds.frontKeybind)
     }
 }

@@ -47,7 +47,7 @@ object BehindYouClient {
         setupAnimations()
         val currentTime = System.nanoTime()
 
-        if (BehindYouConfig.isFovChanged) {
+        if (BehindYouConfig.Fov.enabled) {
             fov = fovAnimation.update(currentTime - fovAnimationStartTime)
         } else if (OmniPerspective.currentPerspective == OmniPerspective.FIRST_PERSON) {
             baselineFov = fov
@@ -67,7 +67,7 @@ object BehindYouClient {
                     baselineFov = fov
                 }
 
-                BehindYouConfig.backDistance to BehindYouConfig.backFov
+                BehindYouConfig.Distance.back to BehindYouConfig.Fov.back
             }
 
             OmniPerspective.THIRD_PERSON_BACK -> {
@@ -75,7 +75,7 @@ object BehindYouClient {
                     baselineFov = fov
                 }
 
-                BehindYouConfig.frontDistance to BehindYouConfig.frontFov
+                BehindYouConfig.Distance.front to BehindYouConfig.Fov.front
             }
 
             else -> {
@@ -85,7 +85,7 @@ object BehindYouClient {
         }
 
         setTargetLevel(z, targetFov)
-        if (BehindYouConfig.isCameraAnimated && currentPerspective.isThirdPerson && perspective.isThirdPerson) {
+        if (BehindYouConfig.Animation.enabled && currentPerspective.isThirdPerson && perspective.isThirdPerson) {
             zAnimation.from = 0.3f
             zAnimationStartTime = System.nanoTime()
             zAnimation.reset()
@@ -97,14 +97,14 @@ object BehindYouClient {
 
     private fun setTargetLevel(z: Float, fov: Float) {
         setupAnimations()
-        val animations = BehindYouConfig.isCameraAnimated
+        val animations = BehindYouConfig.Animation.enabled
 
         zAnimation.to = z
         zAnimation.from = if (animations) zAnimation.value else z
         zAnimationStartTime = System.nanoTime()
         zAnimation.reset()
 
-        if (!BehindYouConfig.isFovChanged) return
+        if (!BehindYouConfig.Fov.enabled) return
 
         if (!animations) this.fov = fov
         fovAnimation.to = fov
@@ -115,12 +115,12 @@ object BehindYouClient {
 
     private fun setupAnimations() {
         if (!::zAnimation.isInitialized) {
-            zAnimation = Animations.EaseOutQuart.create(BehindYouConfig.animSpeed.seconds, 0.3f, 0f)
+            zAnimation = Animations.EaseOutQuart.create(BehindYouConfig.Animation.speed.seconds, 0.3f, 0f)
             zAnimation.finishNow()
         }
 
         if (!::fovAnimation.isInitialized) {
-            fovAnimation = Animations.EaseOutQuart.create(BehindYouConfig.animSpeed.seconds, initialFov, initialFov)
+            fovAnimation = Animations.EaseOutQuart.create(BehindYouConfig.Animation.speed.seconds, initialFov, initialFov)
             fovAnimation.finishNow()
         }
     }
