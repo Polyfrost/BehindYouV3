@@ -27,6 +27,8 @@
     "license": "LGPL-3.0",
     "environment": "client",
     "depends": {
-        "minecraft": "${mc_version}"
+        "minecraft": "${minecraft_version_range}",
+        "fabricloader": ">=${loader_version}",
+        "fabric-language-kotlin": "*"
     }
 }

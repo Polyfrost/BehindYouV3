@@ -1,8 +1,8 @@
 package org.polyfrost.behindyou.client
 
-import dev.deftu.omnicore.api.client.client
-import dev.deftu.omnicore.api.client.input.OmniKeys
-import dev.deftu.omnicore.api.client.options.OmniPerspective
+import net.minecraft.client.CameraType
+import net.minecraft.client.Minecraft
+import org.lwjgl.glfw.GLFW
 import org.polyfrost.behindyou.BehindYouConstants
 import org.polyfrost.oneconfig.api.config.v1.Config
 import org.polyfrost.oneconfig.api.config.v1.annotations.Accordion
@@ -11,9 +11,8 @@ import org.polyfrost.oneconfig.api.config.v1.annotations.Keybind
 import org.polyfrost.oneconfig.api.config.v1.annotations.RadioButton
 import org.polyfrost.oneconfig.api.config.v1.annotations.Slider
 import org.polyfrost.oneconfig.api.config.v1.annotations.Switch
+import org.polyfrost.oneconfig.api.ui.v1.keybind.KeybindHelper
 import org.polyfrost.oneconfig.api.ui.v1.keybind.KeybindManager
-import org.polyfrost.polyui.animate.Animations
-import org.polyfrost.polyui.input.KeybindHelper
 import org.polyfrost.polyui.unit.seconds
 
 object BehindYouConfig : Config(
@@ -22,38 +21,41 @@ object BehindYouConfig : Config(
     BehindYouConstants.NAME,
     Category.QOL
 ) {
+    private val minecraft: Minecraft
+        get() = Minecraft.getInstance()
+
     @Switch(title = "Enable BehindYou", description = "Master switch to enable/disable the mod")
     var isEnabled = true
 
     @Accordion(title = "Keybinds", subcategory = "Keybind Settings", index = 0)
     object Keybinds {
         @Keybind(title = "Back View Keybind")
-        var backKeybind = KeybindHelper.builder().keys(OmniKeys.KEY_NONE.code).does { isDown ->
-            if (!isEnabled || client.screen != null) return@does
-            if (backKeybindHandleMode == KeybindHandleMode.Toggle && !isDown) return@does
+        var backKeybind = KeybindHelper.builder().key(GLFW.GLFW_KEY_UNKNOWN).action { isDown ->
+            if (!isEnabled || backKeybindHandleMode == KeybindHandleMode.Toggle && !isDown) return@action false
 
             val perspective = when {
-                backKeybindHandleMode == KeybindHandleMode.Hold && !isDown -> OmniPerspective.FIRST_PERSON
-                OmniPerspective.currentPerspective == OmniPerspective.THIRD_PERSON_FRONT -> OmniPerspective.FIRST_PERSON
-                else -> OmniPerspective.THIRD_PERSON_FRONT
+                backKeybindHandleMode == KeybindHandleMode.Hold && !isDown -> CameraType.FIRST_PERSON
+                minecraft.options.cameraType == CameraType.THIRD_PERSON_FRONT -> CameraType.FIRST_PERSON
+                else -> CameraType.THIRD_PERSON_FRONT
             }
             BehindYouClient.updatePerspective(perspective)
+            true
         }.build()
 
         @RadioButton(title = "Back View Handle Mode")
         var backKeybindHandleMode = KeybindHandleMode.Hold
 
         @Keybind(title = "Front View Keybind")
-        var frontKeybind = KeybindHelper.builder().keys(OmniKeys.KEY_NONE.code).does { isDown ->
-            if (!isEnabled || client.screen != null) return@does
-            if (frontKeybindHandleMode == KeybindHandleMode.Toggle && !isDown) return@does
+        var frontKeybind = KeybindHelper.builder().key(GLFW.GLFW_KEY_UNKNOWN).action { isDown ->
+            if (!isEnabled || frontKeybindHandleMode == KeybindHandleMode.Toggle && !isDown) return@action false
 
             val perspective = when {
-                frontKeybindHandleMode == KeybindHandleMode.Hold && !isDown -> OmniPerspective.FIRST_PERSON
-                OmniPerspective.currentPerspective == OmniPerspective.THIRD_PERSON_BACK -> OmniPerspective.FIRST_PERSON
-                else -> OmniPerspective.THIRD_PERSON_BACK
+                frontKeybindHandleMode == KeybindHandleMode.Hold && !isDown -> CameraType.FIRST_PERSON
+                minecraft.options.cameraType == CameraType.THIRD_PERSON_BACK -> CameraType.FIRST_PERSON
+                else -> CameraType.THIRD_PERSON_BACK
             }
             BehindYouClient.updatePerspective(perspective)
+            true
         }.build()
 
         @RadioButton(title = "Front View Handle Mode")
@@ -65,7 +67,7 @@ object BehindYouConfig : Config(
         @Include
         var enabled = true
 
-        @Slider(title = "Animation Time (secs)", min = 0.1f, max = 2f)
+        @Slider(title = "Animation Time (secs)", min = 0.1f, max = 2f, step = 0.1f)
         var speed = 1f
     }
 
@@ -83,24 +85,24 @@ object BehindYouConfig : Config(
 
     @Accordion(title = "Distance Settings", description = "Modify your camera distance", subcategory = "Camera Settings", index = 3)
     object Distance {
-        @Slider(title = "Back View Distance", min = 1f, max = 4f)
+        @Slider(title = "Back View Distance", min = 1f, max = 4f, step = 0.1f)
         var back = 4f
 
-        @Slider(title = "Front View Distance", min = 1f, max = 4f)
+        @Slider(title = "Front View Distance", min = 1f, max = 4f, step = 0.1f)
         var front = 4f
     }
 
     init {
         addDependency("Animation.speed", "Animation.enabled")
         addCallback("Animation.speed") { value: Float ->
-            BehindYouClient.modifyAnimations(value.seconds, Animations.EaseOutQuart)
+            BehindYouClient.modifyAnimations(value.seconds)
             false
         }
 
         addDependency("Fov.back", "Fov.enabled")
         addDependency("Fov.front", "Fov.enabled")
 
-        KeybindManager.registerKeybind(Keybinds.backKeybind)
-        KeybindManager.registerKeybind(Keybinds.frontKeybind)
+        KeybindManager.register(Keybinds.backKeybind)
+        KeybindManager.register(Keybinds.frontKeybind)
     }
 }

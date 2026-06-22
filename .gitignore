@@ -20,6 +20,7 @@ build
 .gradle
 
 # other
+.DS_Store
 eclipse
 !**/*.gitkeep
 **/run

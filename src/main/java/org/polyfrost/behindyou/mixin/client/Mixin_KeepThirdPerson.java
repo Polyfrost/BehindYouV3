@@ -1,7 +1,6 @@
 package org.polyfrost.behindyou.mixin.client;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import dev.deftu.omnicore.api.client.options.OmniPerspective;
 import net.minecraft.client.CameraType;
 import org.polyfrost.behindyou.client.BehindYouClient;
 import org.polyfrost.behindyou.client.BehindYouConfig;
@@ -26,8 +25,8 @@ public class Mixin_KeepThirdPerson {
         }
 
         boolean isAnimating = !BehindYouClient.isFinished()
-                && BehindYouClient.getPreviousPerspective().isFrontView()
-                && OmniPerspective.getCurrentPerspective().isFirstPerson();
+                && BehindYouClient.getPreviousPerspective() == CameraType.THIRD_PERSON_FRONT
+                && CameraType.FIRST_PERSON == net.minecraft.client.Minecraft.getInstance().options.getCameraType();
         return isAnimating || isMirrored;
     }
 }

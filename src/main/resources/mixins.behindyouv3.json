@@ -1,4 +1,5 @@
 {
+    "compatibilityLevel": "JAVA_21",
     "minVersion": "0.7",
     "package": "org.polyfrost.behindyou.mixin",
     "refmap": "mixins.behindyouv3.refmap.json",

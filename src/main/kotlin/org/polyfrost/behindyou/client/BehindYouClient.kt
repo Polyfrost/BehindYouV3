@@ -1,25 +1,27 @@
 package org.polyfrost.behindyou.client
 
-import dev.deftu.omnicore.api.client.client
-import dev.deftu.omnicore.api.client.options.OmniPerspective
-import dev.deftu.omnicore.api.client.options.OmniVideoSettings
+import net.minecraft.client.CameraType
+import net.minecraft.client.Minecraft
 import org.polyfrost.oneconfig.api.event.v1.eventHandler
 import org.polyfrost.oneconfig.api.event.v1.events.InitializationEvent
 import org.polyfrost.polyui.animate.Animation
-import org.polyfrost.polyui.animate.Animations
+import org.polyfrost.polyui.animate.Easing
 import org.polyfrost.polyui.unit.seconds
 
 object BehindYouClient {
+    private val minecraft: Minecraft
+        get() = Minecraft.getInstance()
+
     var fov: Float
-        get() = OmniVideoSettings.fov.toFloat()
+        get() = minecraft.options.fov().get().toFloat()
         set(value) {
-            client.options.fov().set(value.toInt())
+            minecraft.options.fov().set(value.toInt())
         }
 
     private var baselineFov = 0f
     private var initialFov = 0f
 
-    @get:JvmStatic var previousPerspective = OmniPerspective.FIRST_PERSON
+    @get:JvmStatic var previousPerspective = CameraType.FIRST_PERSON
         private set
 
     private lateinit var zAnimation: Animation
@@ -49,7 +51,7 @@ object BehindYouClient {
 
         if (BehindYouConfig.Fov.enabled) {
             fov = fovAnimation.update(currentTime - fovAnimationStartTime)
-        } else if (OmniPerspective.currentPerspective == OmniPerspective.FIRST_PERSON) {
+        } else if (minecraft.options.cameraType == CameraType.FIRST_PERSON) {
             baselineFov = fov
         }
 
@@ -57,12 +59,12 @@ object BehindYouClient {
     }
 
     @JvmStatic
-    fun updatePerspective(perspective: OmniPerspective) {
-        val currentPerspective = OmniPerspective.currentPerspective
+    fun updatePerspective(perspective: CameraType) {
+        val currentPerspective = minecraft.options.cameraType
         if (currentPerspective == perspective) return
 
         val (z, targetFov) = when (perspective) {
-            OmniPerspective.THIRD_PERSON_FRONT -> {
+            CameraType.THIRD_PERSON_FRONT -> {
                 if (currentPerspective.isFirstPerson) {
                     baselineFov = fov
                 }
@@ -70,7 +72,7 @@ object BehindYouClient {
                 BehindYouConfig.Distance.back to BehindYouConfig.Fov.back
             }
 
-            OmniPerspective.THIRD_PERSON_BACK -> {
+            CameraType.THIRD_PERSON_BACK -> {
                 if (currentPerspective.isFirstPerson) {
                     baselineFov = fov
                 }
@@ -85,14 +87,14 @@ object BehindYouClient {
         }
 
         setTargetLevel(z, targetFov)
-        if (BehindYouConfig.Animation.enabled && currentPerspective.isThirdPerson && perspective.isThirdPerson) {
+        if (BehindYouConfig.Animation.enabled && !currentPerspective.isFirstPerson && !perspective.isFirstPerson) {
             zAnimation.from = 0.3f
             zAnimationStartTime = System.nanoTime()
             zAnimation.reset()
         }
 
         previousPerspective = currentPerspective
-        perspective.apply()
+        minecraft.options.setCameraType(perspective)
     }
 
     private fun setTargetLevel(z: Float, fov: Float) {
@@ -115,20 +117,23 @@ object BehindYouClient {
 
     private fun setupAnimations() {
         if (!::zAnimation.isInitialized) {
-            zAnimation = Animations.EaseOutQuart.create(BehindYouConfig.Animation.speed.seconds, 0.3f, 0f)
+            zAnimation = createAnimation(BehindYouConfig.Animation.speed.seconds, 0.3f, 0f)
             zAnimation.finishNow()
         }
 
         if (!::fovAnimation.isInitialized) {
-            fovAnimation = Animations.EaseOutQuart.create(BehindYouConfig.Animation.speed.seconds, initialFov, initialFov)
+            fovAnimation = createAnimation(BehindYouConfig.Animation.speed.seconds, initialFov, initialFov)
             fovAnimation.finishNow()
         }
     }
 
-    fun modifyAnimations(duration: Long, curve: Animations) {
-        zAnimation = curve.create(duration, zAnimation.value, zAnimation.to)
+    private fun createAnimation(duration: Long, from: Float, to: Float): Animation =
+        Easing.Quart(Easing.Type.Out, duration, from, to)
+
+    fun modifyAnimations(duration: Long) {
+        zAnimation = createAnimation(duration, zAnimation.value, zAnimation.to)
         zAnimation.finishNow()
-        fovAnimation = curve.create(duration, fovAnimation.value, fovAnimation.to)
+        fovAnimation = createAnimation(duration, fovAnimation.value, fovAnimation.to)
         fovAnimation.finishNow()
     }
 }
