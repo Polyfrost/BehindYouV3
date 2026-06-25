@@ -13,7 +13,6 @@ import org.polyfrost.oneconfig.api.config.v1.annotations.Slider
 import org.polyfrost.oneconfig.api.config.v1.annotations.Switch
 import org.polyfrost.oneconfig.api.ui.v1.keybind.KeybindHelper
 import org.polyfrost.oneconfig.api.ui.v1.keybind.KeybindManager
-import org.polyfrost.polyui.unit.seconds
 
 object BehindYouConfig : Config(
     "${BehindYouConstants.ID}.json",

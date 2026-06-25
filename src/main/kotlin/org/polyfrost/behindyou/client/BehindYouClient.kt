@@ -4,11 +4,12 @@ import net.minecraft.client.CameraType
 import net.minecraft.client.Minecraft
 import org.polyfrost.oneconfig.api.event.v1.eventHandler
 import org.polyfrost.oneconfig.api.event.v1.events.InitializationEvent
-import org.polyfrost.polyui.animate.Animation
-import org.polyfrost.polyui.animate.Easing
-import org.polyfrost.polyui.unit.seconds
 
 object BehindYouClient {
+    // How close (in blocks) the camera must get to its target before we treat the animation as done
+    // for the purpose of switching INTO first person. The z animation eases out, so it decelerates
+    private const val ARRIVAL_EPSILON = 0.5f
+
     private val minecraft: Minecraft
         get() = Minecraft.getInstance()
 
@@ -26,13 +27,12 @@ object BehindYouClient {
 
     private lateinit var zAnimation: Animation
     private lateinit var fovAnimation: Animation
-    private var zAnimationStartTime = 0L
-    private var fovAnimationStartTime = 0L
 
     @JvmStatic val isFinished: Boolean
         get() {
             setupAnimations()
-            return ::zAnimation.isInitialized && zAnimation.isFinished
+            if (zAnimation.isFinished) return true
+            return kotlin.math.abs(zAnimation.value - zAnimation.to) <= ARRIVAL_EPSILON
         }
 
     fun initialize() {
@@ -45,17 +45,17 @@ object BehindYouClient {
     }
 
     @JvmStatic
-    fun getLevel(zIn: Double): Double {
+    fun getLevel(zIn: Double, partialTicks: Float): Double {
         setupAnimations()
-        val currentTime = System.nanoTime()
+        val deltaTime = (partialTicks * 50_000_000f).toLong()
 
         if (BehindYouConfig.Fov.enabled) {
-            fov = fovAnimation.update(currentTime - fovAnimationStartTime)
+            fov = fovAnimation.update(deltaTime)
         } else if (minecraft.options.cameraType == CameraType.FIRST_PERSON) {
             baselineFov = fov
         }
 
-        return zAnimation.update(currentTime - zAnimationStartTime).toDouble().coerceAtMost(zIn)
+        return zAnimation.update(deltaTime).toDouble().coerceAtMost(zIn)
     }
 
     @JvmStatic
@@ -65,7 +65,7 @@ object BehindYouClient {
 
         val (z, targetFov) = when (perspective) {
             CameraType.THIRD_PERSON_FRONT -> {
-                if (currentPerspective.isFirstPerson) {
+                if (currentPerspective == CameraType.FIRST_PERSON) {
                     baselineFov = fov
                 }
 
@@ -73,7 +73,7 @@ object BehindYouClient {
             }
 
             CameraType.THIRD_PERSON_BACK -> {
-                if (currentPerspective.isFirstPerson) {
+                if (currentPerspective == CameraType.FIRST_PERSON) {
                     baselineFov = fov
                 }
 
@@ -87,9 +87,11 @@ object BehindYouClient {
         }
 
         setTargetLevel(z, targetFov)
-        if (BehindYouConfig.Animation.enabled && !currentPerspective.isFirstPerson && !perspective.isFirstPerson) {
+        if (BehindYouConfig.Animation.enabled &&
+            currentPerspective != CameraType.FIRST_PERSON &&
+            perspective != CameraType.FIRST_PERSON
+        ) {
             zAnimation.from = 0.3f
-            zAnimationStartTime = System.nanoTime()
             zAnimation.reset()
         }
 
@@ -103,7 +105,6 @@ object BehindYouClient {
 
         zAnimation.to = z
         zAnimation.from = if (animations) zAnimation.value else z
-        zAnimationStartTime = System.nanoTime()
         zAnimation.reset()
 
         if (!BehindYouConfig.Fov.enabled) return
@@ -111,13 +112,12 @@ object BehindYouClient {
         if (!animations) this.fov = fov
         fovAnimation.to = fov
         fovAnimation.from = if (animations) fovAnimation.value else fov
-        fovAnimationStartTime = System.nanoTime()
         fovAnimation.reset()
     }
 
     private fun setupAnimations() {
         if (!::zAnimation.isInitialized) {
-            zAnimation = createAnimation(BehindYouConfig.Animation.speed.seconds, 0.3f, 0f)
+            zAnimation = createAnimation(BehindYouConfig.Animation.speed.seconds, 0.1f, 0f)
             zAnimation.finishNow()
         }
 
@@ -128,7 +128,7 @@ object BehindYouClient {
     }
 
     private fun createAnimation(duration: Long, from: Float, to: Float): Animation =
-        Easing.Quart(Easing.Type.Out, duration, from, to)
+        Animation(duration, from, to)
 
     fun modifyAnimations(duration: Long) {
         zAnimation = createAnimation(duration, zAnimation.value, zAnimation.to)
