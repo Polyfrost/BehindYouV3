@@ -1,13 +1,15 @@
 {
-  "compatibilityLevel": "JAVA_8",
-  "minVersion": "0.7",
-  "package": "dev.isxander.behindyou.mixin",
-  "refmap": "mixins.behindyouv3.refmap.json",
-  "injectors": {
-    "maxShiftBy": 5
-  },
-  "verbose": true,
-  "client": [
-    "EntityRendererMixin"
-  ]
+    "compatibilityLevel": "JAVA_21",
+    "minVersion": "0.7",
+    "package": "org.polyfrost.behindyou.mixin",
+    "refmap": "mixins.behindyouv3.refmap.json",
+    "injectors": {
+        "maxShiftBy": 5
+    },
+    "verbose": true,
+    "client": [
+		"client.Mixin_AdjustLevel",
+		"client.Mixin_CapturePOVSet",
+		"client.Mixin_KeepThirdPerson"
+    ]
 }

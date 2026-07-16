@@ -20,7 +20,9 @@ build
 .gradle
 
 # other
+.DS_Store
 eclipse
 !**/*.gitkeep
 **/run
 .vscode/
+/main.py
