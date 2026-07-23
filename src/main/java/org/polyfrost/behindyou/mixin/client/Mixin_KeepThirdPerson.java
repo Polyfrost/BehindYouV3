@@ -2,6 +2,7 @@ package org.polyfrost.behindyou.mixin.client;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.client.CameraType;
+import net.minecraft.client.Minecraft;
 import org.polyfrost.behindyou.client.BehindYouClient;
 import org.polyfrost.behindyou.client.BehindYouConfig;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,7 +27,7 @@ public class Mixin_KeepThirdPerson {
 
         boolean isAnimating = !BehindYouClient.isFinished()
                 && BehindYouClient.getPreviousPerspective() == CameraType.THIRD_PERSON_FRONT
-                && CameraType.FIRST_PERSON == net.minecraft.client.Minecraft.getInstance().options.getCameraType();
+                && Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON;
         return isAnimating || isMirrored;
     }
 }

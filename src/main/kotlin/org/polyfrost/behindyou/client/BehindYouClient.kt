@@ -69,7 +69,7 @@ object BehindYouClient {
                     baselineFov = fov
                 }
 
-                BehindYouConfig.Distance.back to BehindYouConfig.Fov.back
+                BehindYouConfig.Distance.front to BehindYouConfig.Fov.front
             }
 
             CameraType.THIRD_PERSON_BACK -> {
@@ -77,7 +77,7 @@ object BehindYouClient {
                     baselineFov = fov
                 }
 
-                BehindYouConfig.Distance.front to BehindYouConfig.Fov.front
+                BehindYouConfig.Distance.back to BehindYouConfig.Fov.back
             }
 
             else -> {

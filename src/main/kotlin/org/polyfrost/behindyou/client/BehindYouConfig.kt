@@ -34,8 +34,8 @@ object BehindYouConfig : Config(
 
             val perspective = when {
                 backKeybindHandleMode == KeybindHandleMode.Hold && !isDown -> CameraType.FIRST_PERSON
-                minecraft.options.cameraType == CameraType.THIRD_PERSON_FRONT -> CameraType.FIRST_PERSON
-                else -> CameraType.THIRD_PERSON_FRONT
+                minecraft.options.cameraType == CameraType.THIRD_PERSON_BACK -> CameraType.FIRST_PERSON
+                else -> CameraType.THIRD_PERSON_BACK
             }
             BehindYouClient.updatePerspective(perspective)
             true
@@ -50,8 +50,8 @@ object BehindYouConfig : Config(
 
             val perspective = when {
                 frontKeybindHandleMode == KeybindHandleMode.Hold && !isDown -> CameraType.FIRST_PERSON
-                minecraft.options.cameraType == CameraType.THIRD_PERSON_BACK -> CameraType.FIRST_PERSON
-                else -> CameraType.THIRD_PERSON_BACK
+                minecraft.options.cameraType == CameraType.THIRD_PERSON_FRONT -> CameraType.FIRST_PERSON
+                else -> CameraType.THIRD_PERSON_FRONT
             }
             BehindYouClient.updatePerspective(perspective)
             true
