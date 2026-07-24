@@ -1,2 +1,2 @@
-## 3.4.1
-- Fixed front and back perspectives being flipped
+## 3.4.2
+- Fixed camera zoom animation not working on 26.1 and 26.2
