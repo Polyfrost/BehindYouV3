@@ -1,10 +1,12 @@
 {
     "compatibilityLevel": "JAVA_21",
     "minVersion": "0.7",
+    "required": true,
     "package": "org.polyfrost.behindyou.mixin",
     "refmap": "mixins.behindyouv3.refmap.json",
     "injectors": {
-        "maxShiftBy": 5
+        "maxShiftBy": 5,
+        "defaultRequire": 1
     },
     "verbose": true,
     "client": [

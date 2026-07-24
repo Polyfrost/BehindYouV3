@@ -19,6 +19,10 @@ out
 build
 .gradle
 
+# test byproducts
+**/.fabric/
+versions/*/logs/
+
 # other
 .DS_Store
 eclipse
