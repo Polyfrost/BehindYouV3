@@ -1,2 +1,3 @@
-## 3.4.2
-- Fixed camera zoom animation not working on 26.1 and 26.2
+## 3.4.3
+- The mod is now disabled by default
+- Options are now hidden if the mod is disabled
