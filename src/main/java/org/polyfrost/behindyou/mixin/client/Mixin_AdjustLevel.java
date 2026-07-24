@@ -11,6 +11,9 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(Camera.class)
 public class Mixin_AdjustLevel {
+    //? if >=26.1 {
+    /*@WrapOperation(method = "alignWithEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getMaxZoom(F)F"))
+    *///?} else
     @WrapOperation(method = "setup", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getMaxZoom(F)F"))
     private float adjustLevel(Camera instance, float zoom, Operation<Float> original, @Local(argsOnly = true) float partialTick) {
         float maxZoom = original.call(instance, zoom);
