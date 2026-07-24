@@ -24,7 +24,7 @@ object BehindYouConfig : Config(
         get() = Minecraft.getInstance()
 
     @Switch(title = "Enable BehindYou", description = "Master switch to enable/disable the mod")
-    var isEnabled = true
+    var isEnabled = false
 
     @Accordion(title = "Keybinds", subcategory = "Keybind Settings", index = 0)
     object Keybinds {
@@ -92,6 +92,21 @@ object BehindYouConfig : Config(
     }
 
     init {
+        // OneConfig cannot hide accordions themselves, so hide each option within them instead.
+        for (option in arrayOf(
+            "Keybinds.backKeybind",
+            "Keybinds.backKeybindHandleMode",
+            "Keybinds.frontKeybind",
+            "Keybinds.frontKeybindHandleMode",
+            "Animation.speed",
+            "Fov.back",
+            "Fov.front",
+            "Distance.back",
+            "Distance.front",
+        )) {
+            hideIf(option, "isEnabled")
+        }
+
         addDependency("Animation.speed", "Animation.enabled")
         addCallback("Animation.speed") { value: Float ->
             BehindYouClient.modifyAnimations(value.seconds)
