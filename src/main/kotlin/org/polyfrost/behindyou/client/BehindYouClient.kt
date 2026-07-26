@@ -131,6 +131,9 @@ object BehindYouClient {
         Animation(duration, from, to)
 
     fun modifyAnimations(duration: Long) {
+        // Animations that do not exist yet pick the new duration up from the config in setupAnimations
+        if (!::zAnimation.isInitialized || !::fovAnimation.isInitialized) return
+
         zAnimation = createAnimation(duration, zAnimation.value, zAnimation.to)
         zAnimation.finishNow()
         fovAnimation = createAnimation(duration, fovAnimation.value, fovAnimation.to)
