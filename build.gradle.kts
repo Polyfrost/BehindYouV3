@@ -83,7 +83,7 @@ dependencies {
 
     modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
     modImplementation("org.polyfrost.oneconfig:$mcversion-fabric:$oneconfigversion")
-    for (module in arrayOf("commands", "config", "config-impl", "events", "internal", "ui", "utils", "hud")) {
+    for (module in arrayOf("commands", "config", "config-impl", "events", "internal", "notifications", "ui", "utils", "hud")) {
         implementation("org.polyfrost.oneconfig:$module:$oneconfigversion")
     }
     implementation("org.polyfrost:polyui:2.1.7")

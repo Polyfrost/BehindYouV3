@@ -15,13 +15,21 @@ import org.polyfrost.oneconfig.api.ui.v1.keybind.KeybindHelper
 import org.polyfrost.oneconfig.api.ui.v1.keybind.KeybindManager
 
 object BehindYouConfig : Config(
-    "${BehindYouConstants.ID}.json",
+    BehindYouConstants.CONFIG_ID,
     "/assets/behindyouv3/behindyou_dark.svg",
     BehindYouConstants.NAME,
     Category.QOL
 ) {
     private val minecraft: Minecraft
         get() = Minecraft.getInstance()
+
+    /** The schema this config was written against. Maintained by [ConfigMigrator]. */
+    @Include
+    var SCHEMA_VERSION = ConfigMigrator.CURRENT_SCHEMA_VERSION
+
+    /** The newest schema whose migration the player has been told about. Maintained by [ConfigMigrator]. */
+    @Include
+    var NOTIFIED_SCHEMA_VERSION = ConfigMigrator.CURRENT_SCHEMA_VERSION
 
     @Switch(title = "Enable BehindYou", description = "Master switch to enable/disable the mod")
     var isEnabled = false

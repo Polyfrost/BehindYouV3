@@ -5,4 +5,6 @@ object BehindYouConstants {
     const val ID = "@MOD_ID@"
     const val NAME = "@MOD_NAME@"
     const val VERSION = "@MOD_VERSION@"
+
+    const val CONFIG_ID = "$ID.json"
 }

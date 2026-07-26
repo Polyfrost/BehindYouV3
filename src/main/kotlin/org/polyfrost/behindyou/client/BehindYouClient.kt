@@ -4,6 +4,7 @@ import net.minecraft.client.CameraType
 import net.minecraft.client.Minecraft
 import org.polyfrost.oneconfig.api.event.v1.eventHandler
 import org.polyfrost.oneconfig.api.event.v1.events.InitializationEvent
+import org.polyfrost.oneconfig.api.event.v1.events.WorldEvent
 
 object BehindYouClient {
     // How close (in blocks) the camera must get to its target before we treat the animation as done
@@ -36,11 +37,16 @@ object BehindYouClient {
         }
 
     fun initialize() {
+        ConfigMigrator.migrate()
         BehindYouConfig.preload()
 
         eventHandler<InitializationEvent> {
             baselineFov = fov
             initialFov = fov
+        }
+
+        eventHandler<WorldEvent.Load> {
+            ConfigMigrator.notifyPending()
         }
     }
 
