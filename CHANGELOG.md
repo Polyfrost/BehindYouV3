@@ -1,3 +1,2 @@
-## 3.4.3
-- The mod is now disabled by default
-- Options are now hidden if the mod is disabled
+## 3.4.4
+- If you previously had the mod enabled, it will be disabled when installing this version, to avoid disruption for players who already installed OneClient in the default-enabled state before. Once you enable it again manually, it will stay enabled.
