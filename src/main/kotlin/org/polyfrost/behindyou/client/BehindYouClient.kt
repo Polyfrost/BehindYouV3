@@ -67,20 +67,7 @@ object BehindYouClient {
         val currentPerspective = minecraft.options.cameraType
         if (currentPerspective == perspective) return
 
-        val (z, targetFov) = when (perspective) {
-            CameraType.THIRD_PERSON_FRONT -> {
-                BehindYouConfig.Distance.front to BehindYouConfig.Fov.front
-            }
-
-            CameraType.THIRD_PERSON_BACK -> {
-                BehindYouConfig.Distance.back to BehindYouConfig.Fov.back
-            }
-
-            else -> {
-                val zReset = 0.3f
-                zReset to fov
-            }
-        }
+        val (z, targetFov) = thirdPersonTargets(perspective) ?: (0.3f to fov)
 
         setTargetLevel(z, targetFov)
         if (BehindYouConfig.Animation.enabled &&
@@ -111,19 +98,46 @@ object BehindYouClient {
     }
 
     private fun setupAnimations() {
+        if (::zAnimation.isInitialized && ::fovAnimation.isInitialized) return
+
+        val targets = thirdPersonTargets(minecraft.options.cameraType)
+
         if (!::zAnimation.isInitialized) {
-            zAnimation = createAnimation(BehindYouConfig.Animation.speed.seconds, 0.1f, 0f)
+            val distance = targets?.first ?: 0f
+            zAnimation = createAnimation(BehindYouConfig.Animation.speed.seconds, distance, distance)
             zAnimation.finishNow()
         }
 
         if (!::fovAnimation.isInitialized) {
-            fovAnimation = createAnimation(BehindYouConfig.Animation.speed.seconds, fov, fov)
+            val targetFov = targets?.second ?: fov
+            fovAnimation = createAnimation(BehindYouConfig.Animation.speed.seconds, targetFov, targetFov)
             fovAnimation.finishNow()
         }
     }
 
+    private fun thirdPersonTargets(perspective: CameraType): Pair<Float, Float>? = when (perspective) {
+        CameraType.THIRD_PERSON_FRONT -> BehindYouConfig.Distance.front to BehindYouConfig.Fov.front
+        CameraType.THIRD_PERSON_BACK -> BehindYouConfig.Distance.back to BehindYouConfig.Fov.back
+        else -> null
+    }
+
     private fun createAnimation(duration: Long, from: Float, to: Float): Animation =
         Animation(duration, from, to)
+
+    fun syncActivePerspective(
+        perspective: CameraType = minecraft.options.cameraType,
+        distance: Float? = null,
+        targetFov: Float? = null,
+    ) {
+        if (minecraft.options.cameraType != perspective) return
+        val targets = thirdPersonTargets(perspective) ?: return
+
+        setupAnimations()
+        zAnimation.to = distance ?: targets.first
+        zAnimation.finishNow()
+        fovAnimation.to = targetFov ?: targets.second
+        fovAnimation.finishNow()
+    }
 
     fun modifyAnimations(duration: Long) {
         // animations that do not exist yet read the new duration from config in setupAnimations

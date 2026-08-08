@@ -100,6 +100,12 @@ object BehindYouConfig : Config(
     }
 
     init {
+        addCallback("isEnabled") { value: Boolean ->
+            if (value) BehindYouClient.syncActivePerspective()
+            false
+        }
+
+        // OneConfig cannot hide accordions themselves, so hide each option within them instead.
         for (option in arrayOf(
             "Keybinds.backKeybind",
             "Keybinds.backKeybindHandleMode",
@@ -122,6 +128,26 @@ object BehindYouConfig : Config(
 
         addDependency("Fov.back", "Fov.enabled")
         addDependency("Fov.front", "Fov.enabled")
+        addCallback("Fov.enabled") { value: Boolean ->
+            if (value) BehindYouClient.syncActivePerspective()
+            false
+        }
+        addCallback("Fov.back") { value: Float ->
+            BehindYouClient.syncActivePerspective(CameraType.THIRD_PERSON_BACK, targetFov = value)
+            false
+        }
+        addCallback("Fov.front") { value: Float ->
+            BehindYouClient.syncActivePerspective(CameraType.THIRD_PERSON_FRONT, targetFov = value)
+            false
+        }
+        addCallback("Distance.back") { value: Float ->
+            BehindYouClient.syncActivePerspective(CameraType.THIRD_PERSON_BACK, distance = value)
+            false
+        }
+        addCallback("Distance.front") { value: Float ->
+            BehindYouClient.syncActivePerspective(CameraType.THIRD_PERSON_FRONT, distance = value)
+            false
+        }
 
         KeybindManager.register(Keybinds.backKeybind)
         KeybindManager.register(Keybinds.frontKeybind)
