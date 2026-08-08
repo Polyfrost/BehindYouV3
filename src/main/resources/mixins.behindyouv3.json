@@ -11,6 +11,7 @@
     "verbose": true,
     "client": [
 		"client.Mixin_AdjustLevel",
+		"client.Mixin_AdjustFov",
 		"client.Mixin_CapturePOVSet",
 		"client.Mixin_KeepThirdPerson"
     ]

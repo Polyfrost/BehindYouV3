@@ -3,7 +3,6 @@ package org.polyfrost.behindyou.client
 import net.minecraft.client.CameraType
 import net.minecraft.client.Minecraft
 import org.polyfrost.oneconfig.api.event.v1.eventHandler
-import org.polyfrost.oneconfig.api.event.v1.events.InitializationEvent
 import org.polyfrost.oneconfig.api.event.v1.events.WorldEvent
 
 object BehindYouClient {
@@ -13,14 +12,8 @@ object BehindYouClient {
     private val minecraft: Minecraft
         get() = Minecraft.getInstance()
 
-    var fov: Float
+    private val fov: Float
         get() = minecraft.options.fov().get().toFloat()
-        set(value) {
-            minecraft.options.fov().set(value.toInt())
-        }
-
-    private var baselineFov = 0f
-    private var initialFov = 0f
 
     @get:JvmStatic var previousPerspective = CameraType.FIRST_PERSON
         private set
@@ -39,11 +32,6 @@ object BehindYouClient {
         ConfigMigrator.migrate()
         BehindYouConfig.preload()
 
-        eventHandler<InitializationEvent> {
-            baselineFov = fov
-            initialFov = fov
-        }
-
         eventHandler<WorldEvent.Load> {
             ConfigMigrator.notifyPending()
         }
@@ -53,14 +41,27 @@ object BehindYouClient {
     fun getLevel(zIn: Double, partialTicks: Float): Double {
         setupAnimations()
         val deltaTime = (partialTicks * 50_000_000f).toLong()
+        return zAnimation.update(deltaTime).toDouble().coerceAtMost(zIn)
+    }
 
-        if (BehindYouConfig.Fov.enabled) {
-            fov = fovAnimation.update(deltaTime)
-        } else if (minecraft.options.cameraType == CameraType.FIRST_PERSON) {
-            baselineFov = fov
+    @JvmStatic
+    fun getFov(fovIn: Float, partialTicks: Float): Float {
+        if (!BehindYouConfig.isEnabled || !BehindYouConfig.Fov.enabled) return fovIn
+
+        setupAnimations()
+        if (minecraft.options.cameraType == CameraType.FIRST_PERSON && fovAnimation.to != fovIn) {
+            fovAnimation.to = fovIn
+            if (BehindYouConfig.Animation.enabled) {
+                fovAnimation.from = fovAnimation.value
+                fovAnimation.reset()
+            } else {
+                fovAnimation.from = fovIn
+                fovAnimation.finishNow()
+            }
         }
 
-        return zAnimation.update(deltaTime).toDouble().coerceAtMost(zIn)
+        val deltaTime = (partialTicks * 50_000_000f).toLong()
+        return fovAnimation.update(deltaTime)
     }
 
     @JvmStatic
@@ -70,24 +71,16 @@ object BehindYouClient {
 
         val (z, targetFov) = when (perspective) {
             CameraType.THIRD_PERSON_FRONT -> {
-                if (currentPerspective == CameraType.FIRST_PERSON) {
-                    baselineFov = fov
-                }
-
                 BehindYouConfig.Distance.front to BehindYouConfig.Fov.front
             }
 
             CameraType.THIRD_PERSON_BACK -> {
-                if (currentPerspective == CameraType.FIRST_PERSON) {
-                    baselineFov = fov
-                }
-
                 BehindYouConfig.Distance.back to BehindYouConfig.Fov.back
             }
 
             else -> {
                 val zReset = 0.3f
-                zReset to baselineFov
+                zReset to fov
             }
         }
 
@@ -114,7 +107,6 @@ object BehindYouClient {
 
         if (!BehindYouConfig.Fov.enabled) return
 
-        if (!animations) this.fov = fov
         fovAnimation.to = fov
         fovAnimation.from = if (animations) fovAnimation.value else fov
         fovAnimation.reset()
@@ -127,7 +119,7 @@ object BehindYouClient {
         }
 
         if (!::fovAnimation.isInitialized) {
-            fovAnimation = createAnimation(BehindYouConfig.Animation.speed.seconds, initialFov, initialFov)
+            fovAnimation = createAnimation(BehindYouConfig.Animation.speed.seconds, fov, fov)
             fovAnimation.finishNow()
         }
     }
