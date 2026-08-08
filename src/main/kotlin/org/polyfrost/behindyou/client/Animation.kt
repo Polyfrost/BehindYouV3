@@ -5,29 +5,32 @@ class Animation(
     var from: Float,
     var to: Float,
 ) {
-    private var passedTime = 0f
+    private var startNanos = System.nanoTime()
 
     var value = from
         private set
 
-    val isFinished: Boolean
-        get() = passedTime >= durationNanos.toFloat()
+    var isFinished = false
+        private set
 
-    fun update(deltaNanos: Long): Float {
-        if (passedTime >= durationNanos.toFloat()) return to
-        passedTime += deltaNanos.toFloat()
-        val t = (passedTime / durationNanos.toFloat()).coerceIn(0f, 1f)
+    fun update(): Float {
+        if (isFinished) return value
+
+        val passedNanos = System.nanoTime() - startNanos
+        val t = (passedNanos.toDouble() / durationNanos).coerceIn(0.0, 1.0).toFloat()
         value = easeOutQuart(t) * (to - from) + from
+        if (t >= 1f) isFinished = true
         return value
     }
 
     fun reset() {
-        passedTime = 0f
+        startNanos = System.nanoTime()
+        isFinished = false
         value = from
     }
 
     fun finishNow() {
-        passedTime = durationNanos.toFloat()
+        isFinished = true
         value = to
     }
 

@@ -38,14 +38,13 @@ object BehindYouClient {
     }
 
     @JvmStatic
-    fun getLevel(zIn: Double, partialTicks: Float): Double {
+    fun getLevel(zIn: Double): Double {
         setupAnimations()
-        val deltaTime = (partialTicks * 50_000_000f).toLong()
-        return zAnimation.update(deltaTime).toDouble().coerceAtMost(zIn)
+        return zAnimation.update().toDouble().coerceAtMost(zIn)
     }
 
     @JvmStatic
-    fun getFov(fovIn: Float, partialTicks: Float): Float {
+    fun getFov(fovIn: Float): Float {
         if (!BehindYouConfig.isEnabled || !BehindYouConfig.Fov.enabled) return fovIn
 
         setupAnimations()
@@ -60,8 +59,7 @@ object BehindYouClient {
             }
         }
 
-        val deltaTime = (partialTicks * 50_000_000f).toLong()
-        return fovAnimation.update(deltaTime)
+        return fovAnimation.update()
     }
 
     @JvmStatic
