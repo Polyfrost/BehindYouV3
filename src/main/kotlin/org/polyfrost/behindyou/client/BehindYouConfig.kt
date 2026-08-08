@@ -75,7 +75,7 @@ object BehindYouConfig : Config(
         var enabled = true
 
         @Slider(title = "Animation Time (secs)", min = 0.1f, max = 2f, step = 0.1f)
-        var speed = 1f
+        var speed = 0.4f
     }
 
     @Accordion(title = "FOV Settings", description = "Modify your field of view", subcategory = "Camera Settings", index = 2)

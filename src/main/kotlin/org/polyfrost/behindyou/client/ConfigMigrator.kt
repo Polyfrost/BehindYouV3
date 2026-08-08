@@ -22,7 +22,7 @@ import java.nio.file.Path
  * All profiles are migrated so switching profiles later stays safe
  */
 object ConfigMigrator {
-    const val CURRENT_SCHEMA_VERSION = 1
+    const val CURRENT_SCHEMA_VERSION = 2
 
     // one time message per schema version and versions absent here migrate silently
     private val NOTICES = mapOf(
@@ -33,6 +33,8 @@ object ConfigMigrator {
     private const val SCHEMA_VERSION_KEY = "SCHEMA_VERSION"
     private const val NOTIFIED_SCHEMA_VERSION_KEY = "NOTIFIED_SCHEMA_VERSION"
     private const val IS_ENABLED_KEY = "isEnabled"
+    private const val ANIMATION_KEY = "Animation"
+    private const val ANIMATION_SPEED_KEY = "speed"
 
     // matches what OneConfig writes so a migration does not reformat the file
     private const val INDENT = "\t"
@@ -84,6 +86,14 @@ object ConfigMigrator {
 
             // version 0 to 1 forces the master switch off so carried over configs opt back in manually
             if (stored < 1) config.addProperty(IS_ENABLED_KEY, false)
+
+            // 1 -> 2: change default animation duration from 1 to 0.4
+            if (stored < 2) {
+                val animation = config.getAsJsonObject(ANIMATION_KEY)
+                if (animation?.get(ANIMATION_SPEED_KEY)?.asFloat == 1f) {
+                    animation.addProperty(ANIMATION_SPEED_KEY, 0.4f)
+                }
+            }
 
             val changedOptions = config != original
 
