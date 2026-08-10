@@ -7,8 +7,7 @@ import org.polyfrost.oneconfig.api.event.v1.events.InitializationEvent
 import org.polyfrost.oneconfig.api.event.v1.events.WorldEvent
 
 object BehindYouClient {
-    // How close (in blocks) the camera must get to its target before we treat the animation as done
-    // for the purpose of switching INTO first person. The z animation eases out, so it decelerates
+    // blocks from target at which the eased out z animation counts as arrived for first person switching
     private const val ARRIVAL_EPSILON = 0.5f
 
     private val minecraft: Minecraft
@@ -137,7 +136,7 @@ object BehindYouClient {
         Animation(duration, from, to)
 
     fun modifyAnimations(duration: Long) {
-        // Animations that do not exist yet pick the new duration up from the config in setupAnimations
+        // animations that do not exist yet read the new duration from config in setupAnimations
         if (!::zAnimation.isInitialized || !::fovAnimation.isInitialized) return
 
         zAnimation = createAnimation(duration, zAnimation.value, zAnimation.to)

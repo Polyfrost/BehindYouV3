@@ -23,11 +23,11 @@ object BehindYouConfig : Config(
     private val minecraft: Minecraft
         get() = Minecraft.getInstance()
 
-    /** The schema this config was written against. Maintained by [ConfigMigrator]. */
+    /** schema this config was written against and is maintained by [ConfigMigrator] */
     @Include
     var SCHEMA_VERSION = ConfigMigrator.CURRENT_SCHEMA_VERSION
 
-    /** The newest schema whose migration the player has been told about. Maintained by [ConfigMigrator]. */
+    /** newest schema whose migration the player has been told about */
     @Include
     var NOTIFIED_SCHEMA_VERSION = ConfigMigrator.CURRENT_SCHEMA_VERSION
 
@@ -100,7 +100,6 @@ object BehindYouConfig : Config(
     }
 
     init {
-        // OneConfig cannot hide accordions themselves, so hide each option within them instead.
         for (option in arrayOf(
             "Keybinds.backKeybind",
             "Keybinds.backKeybindHandleMode",

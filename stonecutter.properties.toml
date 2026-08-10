@@ -1,0 +1,45 @@
+mod.id = "behindyouv3"
+mod.name = "BehindYouV3"
+mod.group = "org.polyfrost"
+mod.version = "3.4.4"
+
+deps.fabric_loader = "0.19.3"
+deps.oneconfig = "1.1.4"
+deps.polyui = "2.1.7"
+deps.junit = "6.1.2"
+
+loomx.loom_version = "1.17-SNAPSHOT"
+
+publish.modrinth = "sAFPANmp"
+
+["1.21.1"]
+mod.mc_compat = "1.21.1"
+mod.mc_releases = ["1.21.1"]
+
+["1.21.4"]
+mod.mc_compat = "1.21.4"
+mod.mc_releases = ["1.21.4"]
+
+["1.21.5"]
+mod.mc_compat = "1.21.5"
+mod.mc_releases = ["1.21.5"]
+
+["1.21.8"]
+mod.mc_compat = "1.21.8"
+mod.mc_releases = ["1.21.8"]
+
+["1.21.10"]
+mod.mc_compat = "1.21.10"
+mod.mc_releases = ["1.21.10"]
+
+["1.21.11"]
+mod.mc_compat = "1.21.11"
+mod.mc_releases = ["1.21.11"]
+
+["26.1"]
+mod.mc_compat = "~26.1"
+mod.mc_releases = ["26.1", "26.1.1", "26.1.2"]
+
+["26.2"]
+mod.mc_compat = "~26.2"
+mod.mc_releases = ["26.2"]
