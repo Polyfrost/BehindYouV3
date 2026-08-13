@@ -26,8 +26,13 @@ object ConfigMigrator {
 
     // one time message per schema version and versions absent here migrate silently
     private val NOTICES = mapOf(
-        1 to "The mod has been automatically disabled to prevent unwanted behavior. " +
-            "Open the config to re-enable it if you want to use it.",
+        1 to (NotificationType.ERROR to
+            "The mod has been automatically disabled to prevent unwanted behavior. " +
+            "Open the config to re-enable it if you want to use it."),
+        2 to (NotificationType.INFO to
+            "Camera animations now last exactly as long as configured, where they used to finish " +
+            "early depending on your framerate. Your animation time has been reset to the default, " +
+            "so open the config if you want to change it."),
     )
 
     private const val SCHEMA_VERSION_KEY = "SCHEMA_VERSION"
@@ -35,6 +40,8 @@ object ConfigMigrator {
     private const val IS_ENABLED_KEY = "isEnabled"
     private const val ANIMATION_KEY = "Animation"
     private const val ANIMATION_SPEED_KEY = "speed"
+
+    private const val DEFAULT_ANIMATION_SPEED = 0.4f
 
     // matches what OneConfig writes so a migration does not reformat the file
     private const val INDENT = "\t"
@@ -57,10 +64,11 @@ object ConfigMigrator {
 
         for ((version, notice) in NOTICES) {
             if (version <= notified || version > CURRENT_SCHEMA_VERSION) continue
+            val (type, message) = notice
             Notifications.send(
                 BehindYouConstants.NAME,
-                notice,
-                NotificationType.ERROR,
+                message,
+                type,
                 duration = 10_000f,
                 onClick = Runnable { BehindYouConfig.openUI() },
             )
@@ -87,12 +95,8 @@ object ConfigMigrator {
             // version 0 to 1 forces the master switch off so carried over configs opt back in manually
             if (stored < 1) config.addProperty(IS_ENABLED_KEY, false)
 
-            // 1 -> 2: change default animation duration from 1 to 0.4
             if (stored < 2) {
-                val animation = config.getAsJsonObject(ANIMATION_KEY)
-                if (animation?.get(ANIMATION_SPEED_KEY)?.asFloat == 1f) {
-                    animation.addProperty(ANIMATION_SPEED_KEY, 0.4f)
-                }
+                config.getAsJsonObject(ANIMATION_KEY)?.addProperty(ANIMATION_SPEED_KEY, DEFAULT_ANIMATION_SPEED)
             }
 
             val changedOptions = config != original

@@ -48,15 +48,13 @@ object BehindYouClient {
         if (!BehindYouConfig.isEnabled || !BehindYouConfig.Fov.enabled) return fovIn
 
         setupAnimations()
-        if (minecraft.options.cameraType == CameraType.FIRST_PERSON && fovAnimation.to != fovIn) {
+        if (minecraft.options.cameraType == CameraType.FIRST_PERSON &&
+            fovAnimation.isFinished &&
+            fovAnimation.to != fovIn
+        ) {
+            fovAnimation.from = fovIn
             fovAnimation.to = fovIn
-            if (BehindYouConfig.Animation.enabled) {
-                fovAnimation.from = fovAnimation.value
-                fovAnimation.reset()
-            } else {
-                fovAnimation.from = fovIn
-                fovAnimation.finishNow()
-            }
+            fovAnimation.finishNow()
         }
 
         return fovAnimation.update()
