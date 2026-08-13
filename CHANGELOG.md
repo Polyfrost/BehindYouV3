@@ -1,2 +1,4 @@
-## 3.4.4
-- If you previously had the mod enabled, it will be disabled when installing this version, to avoid disruption for players who already installed OneClient in the default-enabled state before. Once you enable it again manually, it will stay enabled.
+## 3.4.5
+- fix: render custom FOV without modifying settings
+- fix: make camera animations consistent
+- fix: reflect settings changes live
