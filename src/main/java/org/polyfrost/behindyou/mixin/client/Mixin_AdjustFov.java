@@ -1,8 +1,7 @@
 package org.polyfrost.behindyou.mixin.client;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.client.OptionInstance;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import net.minecraft.client.Minecraft;
 //? if >= 26 {
 import net.minecraft.client.Camera;
 //?} else
@@ -15,9 +14,9 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(GameRenderer.class)
 public class Mixin_AdjustFov {
     //~ if < 26 'calculateFov' -> 'getFov'
-    @WrapOperation(method = "getFov", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/OptionInstance;get()Ljava/lang/Object;", ordinal = 0))
-    private Object adjustFov(OptionInstance<Integer> instance, Operation<Object> original) {
-        int fov = (Integer) original.call(instance);
-        return (int) BehindYouClient.getFov(fov);
+    @ModifyExpressionValue(method = "getFov", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(FFF)F", ordinal = 0))
+    private float adjustFov(float original) {
+        int fov  = Minecraft.getInstance().options.fov().get();
+        return original * BehindYouClient.getFov(fov) / fov;
     }
 }
