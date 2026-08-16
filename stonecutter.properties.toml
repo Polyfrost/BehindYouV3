@@ -4,8 +4,7 @@ mod.group = "org.polyfrost"
 mod.version = "3.4.5"
 
 deps.fabric_loader = "0.19.3"
-deps.oneconfig = "1.1.4"
-deps.polyui = "2.1.7"
+deps.oneconfig = "1.1.6"
 deps.junit = "6.1.3"
 
 loomx.loom_version = "1.17-SNAPSHOT"

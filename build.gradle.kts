@@ -58,10 +58,6 @@ dependencies {
 
     modImplementation("net.fabricmc:fabric-loader:$loaderversion")
     modImplementation("org.polyfrost.oneconfig:$mcversion-fabric:$oneconfigversion")
-    for (module in arrayOf("commands", "config", "config-impl", "events", "internal", "notifications", "ui", "utils", "hud")) {
-        implementation("org.polyfrost.oneconfig:$module:$oneconfigversion")
-    }
-    implementation("org.polyfrost:polyui:${sc.properties.get<String>("deps.polyui")}")
 
     testImplementation("org.junit.jupiter:junit-jupiter:${sc.properties.get<String>("deps.junit")}")
     testImplementation("net.fabricmc:fabric-loader-junit:$loaderversion")
@@ -126,7 +122,8 @@ tasks {
             "mod_name" to modname,
             "mod_version" to modversion,
             "minecraft_version_range" to versionrange,
-            "loader_version" to loaderversion
+            "loader_version" to loaderversion,
+            "oneconfig_version" to oneconfigversion
         )
 
         inputs.properties(props)
