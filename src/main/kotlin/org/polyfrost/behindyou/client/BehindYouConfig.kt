@@ -101,7 +101,7 @@ object BehindYouConfig : Config(
 
     init {
         addCallback("isEnabled") { value: Boolean ->
-            if (value) BehindYouClient.syncActivePerspective()
+            if (!value) BehindYouClient.stopManagingPerspective()
             false
         }
 

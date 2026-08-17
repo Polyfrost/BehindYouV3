@@ -12,7 +12,10 @@ import org.spongepowered.asm.mixin.injection.At;
 public class Mixin_KeepThirdPerson {
     @ModifyReturnValue(method = "isFirstPerson", at = @At("RETURN"))
     private boolean keepThirdPerson(boolean isFirstPerson) {
-        if (BehindYouConfig.INSTANCE.isEnabled() && BehindYouConfig.Animation.INSTANCE.getEnabled()) {
+        if ((Object) this == Minecraft.getInstance().options.getCameraType()
+                && BehindYouConfig.INSTANCE.isEnabled()
+                && BehindYouConfig.Animation.INSTANCE.getEnabled()
+                && BehindYouClient.isManagingPerspective()) {
             return BehindYouClient.isFinished() && isFirstPerson;
         } else {
             return isFirstPerson;
@@ -21,7 +24,10 @@ public class Mixin_KeepThirdPerson {
 
     @ModifyReturnValue(method = "isMirrored", at = @At("RETURN"))
     private boolean keepMirrored(boolean isMirrored) {
-        if (!BehindYouConfig.INSTANCE.isEnabled() || !BehindYouConfig.Animation.INSTANCE.getEnabled()) {
+        if ((Object) this != Minecraft.getInstance().options.getCameraType()
+                || !BehindYouConfig.INSTANCE.isEnabled()
+                || !BehindYouConfig.Animation.INSTANCE.getEnabled()
+                || !BehindYouClient.isManagingPerspective()) {
             return isMirrored;
         }
 

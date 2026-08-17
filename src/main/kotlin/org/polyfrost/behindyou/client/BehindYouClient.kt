@@ -20,6 +20,16 @@ object BehindYouClient {
 
     private lateinit var zAnimation: Animation
     private lateinit var fovAnimation: Animation
+    private var managedPerspective: CameraType? = null
+
+    @JvmStatic val isManagingPerspective: Boolean
+        get() {
+            val managed = managedPerspective ?: return false
+            if (minecraft.options.cameraType == managed) return true
+
+            managedPerspective = null
+            return false
+        }
 
     @JvmStatic val isFinished: Boolean
         get() {
@@ -37,15 +47,21 @@ object BehindYouClient {
         }
     }
 
+    fun stopManagingPerspective() {
+        managedPerspective = null
+    }
+
     @JvmStatic
     fun getLevel(zIn: Double): Double {
+        if (!isManagingPerspective) return zIn
+
         setupAnimations()
         return zAnimation.update().toDouble().coerceAtMost(zIn)
     }
 
     @JvmStatic
     fun getFov(fovIn: Float): Float {
-        if (!BehindYouConfig.isEnabled || !BehindYouConfig.Fov.enabled) return fovIn
+        if (!BehindYouConfig.isEnabled || !BehindYouConfig.Fov.enabled || !isManagingPerspective) return fovIn
 
         setupAnimations()
         if (minecraft.options.cameraType == CameraType.FIRST_PERSON &&
@@ -64,6 +80,7 @@ object BehindYouClient {
     fun updatePerspective(perspective: CameraType) {
         val currentPerspective = minecraft.options.cameraType
         if (currentPerspective == perspective) return
+        if (!isManagingPerspective) resetAnimationsToPerspective(currentPerspective)
 
         val (z, targetFov) = thirdPersonTargets(perspective) ?: (0.3f to fov)
 
@@ -77,7 +94,18 @@ object BehindYouClient {
         }
 
         previousPerspective = currentPerspective
+        managedPerspective = perspective
         minecraft.options.setCameraType(perspective)
+    }
+
+    private fun resetAnimationsToPerspective(perspective: CameraType) {
+        setupAnimations()
+        val targets = thirdPersonTargets(perspective)
+
+        zAnimation.to = targets?.first ?: 0f
+        zAnimation.finishNow()
+        fovAnimation.to = targets?.second ?: fov
+        fovAnimation.finishNow()
     }
 
     private fun setTargetLevel(z: Float, fov: Float) {
@@ -127,7 +155,7 @@ object BehindYouClient {
         distance: Float? = null,
         targetFov: Float? = null,
     ) {
-        if (minecraft.options.cameraType != perspective) return
+        if (!isManagingPerspective || minecraft.options.cameraType != perspective) return
         val targets = thirdPersonTargets(perspective) ?: return
 
         setupAnimations()
