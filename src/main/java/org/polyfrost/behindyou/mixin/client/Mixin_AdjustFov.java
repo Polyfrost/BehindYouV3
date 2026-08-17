@@ -16,7 +16,7 @@ public class Mixin_AdjustFov {
     //~ if < 26 'calculateFov' -> 'getFov'
     @ModifyExpressionValue(method = "getFov", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(FFF)F", ordinal = 0))
     private float adjustFov(float original) {
-        int fov  = Minecraft.getInstance().options.fov().get();
+        int fov = Minecraft.getInstance().options.fov().get();
         return original * BehindYouClient.getFov(fov) / fov;
     }
 }

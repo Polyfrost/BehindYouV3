@@ -67,6 +67,9 @@ object BehindYouConfig : Config(
 
         @RadioButton(title = "Front View Handle Mode")
         var frontKeybindHandleMode = KeybindHandleMode.Hold
+
+        @Switch(title = "Enable for Minecraft Perspective Key")
+        var enableF5 = false
     }
 
     @Accordion(title = "Animation Settings", description = "Animate the camera between perspectives", subcategory = "Camera Settings", index = 1)
@@ -111,6 +114,7 @@ object BehindYouConfig : Config(
             "Keybinds.backKeybindHandleMode",
             "Keybinds.frontKeybind",
             "Keybinds.frontKeybindHandleMode",
+            "Keybinds.enableF5",
             "Animation.speed",
             "Fov.back",
             "Fov.front",
