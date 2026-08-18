@@ -22,7 +22,7 @@ import java.nio.file.Path
  * All profiles are migrated so switching profiles later stays safe
  */
 object ConfigMigrator {
-    const val CURRENT_SCHEMA_VERSION = 2
+    const val CURRENT_SCHEMA_VERSION = 3
 
     // one time message per schema version and versions absent here migrate silently
     private val NOTICES = mapOf(
@@ -33,6 +33,10 @@ object ConfigMigrator {
             "Camera animations now last exactly as long as configured, where they used to finish " +
             "early depending on your framerate. Your animation time has been reset to the default, " +
             "so open the config if you want to change it."),
+        3 to (NotificationType.INFO to
+            "Minecraft's perspective key (F5) is no longer changed by the mod, so it cycles views " +
+            "the way it does without it. Open the config and turn it back on under Keybinds if you " +
+            "want the old behavior."),
     )
 
     private const val SCHEMA_VERSION_KEY = "SCHEMA_VERSION"

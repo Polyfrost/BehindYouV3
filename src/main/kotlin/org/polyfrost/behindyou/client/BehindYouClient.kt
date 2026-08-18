@@ -9,6 +9,8 @@ object BehindYouClient {
     // blocks from target at which the eased out z animation counts as arrived for first person switching
     private const val ARRIVAL_EPSILON = 0.5f
 
+    private const val VANILLA_DISTANCE = 4f
+
     private val minecraft: Minecraft
         get() = Minecraft.getInstance()
 
@@ -25,10 +27,20 @@ object BehindYouClient {
     @JvmStatic val isManagingPerspective: Boolean
         get() {
             val managed = managedPerspective ?: return false
-            if (minecraft.options.cameraType == managed) return true
+            if (minecraft.options.cameraType != managed) {
+                managedPerspective = null
+                return false
+            }
 
-            managedPerspective = null
-            return false
+            if (managed == CameraType.FIRST_PERSON &&
+                isFinished &&
+                (!BehindYouConfig.Fov.enabled || fovAnimation.isFinished)
+            ) {
+                managedPerspective = null
+                return false
+            }
+
+            return true
         }
 
     @JvmStatic val isFinished: Boolean
@@ -80,7 +92,7 @@ object BehindYouClient {
     fun updatePerspective(perspective: CameraType) {
         val currentPerspective = minecraft.options.cameraType
         if (currentPerspective == perspective) return
-        if (!isManagingPerspective) resetAnimationsToPerspective(currentPerspective)
+        if (!isManagingPerspective) resetAnimationsToVanilla(currentPerspective)
 
         val (z, targetFov) = thirdPersonTargets(perspective) ?: (0.3f to fov)
         val animate = shouldAnimate(currentPerspective, perspective)
@@ -109,13 +121,12 @@ object BehindYouClient {
         return if (isReturning) mode.animateReturn else mode.animateEnter
     }
 
-    private fun resetAnimationsToPerspective(perspective: CameraType) {
+    private fun resetAnimationsToVanilla(perspective: CameraType) {
         setupAnimations()
-        val targets = thirdPersonTargets(perspective)
 
-        zAnimation.to = targets?.first ?: 0f
+        zAnimation.to = if (perspective == CameraType.FIRST_PERSON) 0f else VANILLA_DISTANCE
         zAnimation.finishNow()
-        fovAnimation.to = targets?.second ?: fov
+        fovAnimation.to = fov
         fovAnimation.finishNow()
     }
 
