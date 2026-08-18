@@ -9,6 +9,8 @@ object BehindYouClient {
     // blocks from target at which the eased out z animation counts as arrived for first person switching
     private const val ARRIVAL_EPSILON = 0.5f
 
+    private const val VANILLA_DISTANCE = 4f
+
     private val minecraft: Minecraft
         get() = Minecraft.getInstance()
 
@@ -20,6 +22,26 @@ object BehindYouClient {
 
     private lateinit var zAnimation: Animation
     private lateinit var fovAnimation: Animation
+    private var managedPerspective: CameraType? = null
+
+    @JvmStatic val isManagingPerspective: Boolean
+        get() {
+            val managed = managedPerspective ?: return false
+            if (minecraft.options.cameraType != managed) {
+                managedPerspective = null
+                return false
+            }
+
+            if (managed == CameraType.FIRST_PERSON &&
+                isFinished &&
+                (!BehindYouConfig.Fov.enabled || fovAnimation.isFinished)
+            ) {
+                managedPerspective = null
+                return false
+            }
+
+            return true
+        }
 
     @JvmStatic val isFinished: Boolean
         get() {
@@ -37,15 +59,21 @@ object BehindYouClient {
         }
     }
 
+    fun stopManagingPerspective() {
+        managedPerspective = null
+    }
+
     @JvmStatic
     fun getLevel(zIn: Double): Double {
+        if (!isManagingPerspective) return zIn
+
         setupAnimations()
         return zAnimation.update().toDouble().coerceAtMost(zIn)
     }
 
     @JvmStatic
     fun getFov(fovIn: Float): Float {
-        if (!BehindYouConfig.isEnabled || !BehindYouConfig.Fov.enabled) return fovIn
+        if (!BehindYouConfig.isEnabled || !BehindYouConfig.Fov.enabled || !isManagingPerspective) return fovIn
 
         setupAnimations()
         if (minecraft.options.cameraType == CameraType.FIRST_PERSON &&
@@ -64,35 +92,64 @@ object BehindYouClient {
     fun updatePerspective(perspective: CameraType) {
         val currentPerspective = minecraft.options.cameraType
         if (currentPerspective == perspective) return
+        if (!isManagingPerspective) resetAnimationsToVanilla(currentPerspective)
 
         val (z, targetFov) = thirdPersonTargets(perspective) ?: (0.3f to fov)
+        val animate = shouldAnimate(currentPerspective, perspective)
 
-        setTargetLevel(z, targetFov)
-        if (BehindYouConfig.Animation.enabled &&
-            currentPerspective != CameraType.FIRST_PERSON &&
-            perspective != CameraType.FIRST_PERSON
-        ) {
+        setTargetLevel(z, targetFov, animate)
+        if (animate && currentPerspective != CameraType.FIRST_PERSON && perspective != CameraType.FIRST_PERSON) {
             zAnimation.from = 0.3f
             zAnimation.reset()
         }
 
         previousPerspective = currentPerspective
+        managedPerspective = perspective
         minecraft.options.setCameraType(perspective)
     }
 
-    private fun setTargetLevel(z: Float, fov: Float) {
+    private fun shouldAnimate(from: CameraType, to: CameraType): Boolean {
+        if (!BehindYouConfig.Animation.enabled) return false
+
+        val isReturning = (to == CameraType.FIRST_PERSON)
+        val mode = when (if (isReturning) from else to) {
+            CameraType.THIRD_PERSON_FRONT -> BehindYouConfig.Animation.front
+            CameraType.THIRD_PERSON_BACK -> BehindYouConfig.Animation.back
+            else -> return false
+        }
+
+        return if (isReturning) mode.animateReturn else mode.animateEnter
+    }
+
+    private fun resetAnimationsToVanilla(perspective: CameraType) {
         setupAnimations()
-        val animations = BehindYouConfig.Animation.enabled
+
+        zAnimation.to = if (perspective == CameraType.FIRST_PERSON) 0f else VANILLA_DISTANCE
+        zAnimation.finishNow()
+        fovAnimation.to = fov
+        fovAnimation.finishNow()
+    }
+
+    private fun setTargetLevel(z: Float, fov: Float, animate: Boolean) {
+        setupAnimations()
 
         zAnimation.to = z
-        zAnimation.from = if (animations) zAnimation.value else z
-        zAnimation.reset()
+        if (animate) {
+            zAnimation.from = zAnimation.value
+            zAnimation.reset()
+        } else {
+            zAnimation.finishNow()
+        }
 
         if (!BehindYouConfig.Fov.enabled) return
 
         fovAnimation.to = fov
-        fovAnimation.from = if (animations) fovAnimation.value else fov
-        fovAnimation.reset()
+        if (animate) {
+            fovAnimation.from = fovAnimation.value
+            fovAnimation.reset()
+        } else {
+            fovAnimation.finishNow()
+        }
     }
 
     private fun setupAnimations() {
@@ -127,7 +184,7 @@ object BehindYouClient {
         distance: Float? = null,
         targetFov: Float? = null,
     ) {
-        if (minecraft.options.cameraType != perspective) return
+        if (!isManagingPerspective || minecraft.options.cameraType != perspective) return
         val targets = thirdPersonTargets(perspective) ?: return
 
         setupAnimations()
