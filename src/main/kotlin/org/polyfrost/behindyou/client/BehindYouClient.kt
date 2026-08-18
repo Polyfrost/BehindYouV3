@@ -83,12 +83,10 @@ object BehindYouClient {
         if (!isManagingPerspective) resetAnimationsToPerspective(currentPerspective)
 
         val (z, targetFov) = thirdPersonTargets(perspective) ?: (0.3f to fov)
+        val animate = shouldAnimate(currentPerspective, perspective)
 
-        setTargetLevel(z, targetFov)
-        if (BehindYouConfig.Animation.enabled &&
-            currentPerspective != CameraType.FIRST_PERSON &&
-            perspective != CameraType.FIRST_PERSON
-        ) {
+        setTargetLevel(z, targetFov, animate)
+        if (animate && currentPerspective != CameraType.FIRST_PERSON && perspective != CameraType.FIRST_PERSON) {
             zAnimation.from = 0.3f
             zAnimation.reset()
         }
@@ -96,6 +94,19 @@ object BehindYouClient {
         previousPerspective = currentPerspective
         managedPerspective = perspective
         minecraft.options.setCameraType(perspective)
+    }
+
+    private fun shouldAnimate(from: CameraType, to: CameraType): Boolean {
+        if (!BehindYouConfig.Animation.enabled) return false
+
+        val isReturning = (to == CameraType.FIRST_PERSON)
+        val mode = when (if (isReturning) from else to) {
+            CameraType.THIRD_PERSON_FRONT -> BehindYouConfig.Animation.front
+            CameraType.THIRD_PERSON_BACK -> BehindYouConfig.Animation.back
+            else -> return false
+        }
+
+        return if (isReturning) mode.animateReturn else mode.animateEnter
     }
 
     private fun resetAnimationsToPerspective(perspective: CameraType) {
@@ -108,19 +119,26 @@ object BehindYouClient {
         fovAnimation.finishNow()
     }
 
-    private fun setTargetLevel(z: Float, fov: Float) {
+    private fun setTargetLevel(z: Float, fov: Float, animate: Boolean) {
         setupAnimations()
-        val animations = BehindYouConfig.Animation.enabled
 
         zAnimation.to = z
-        zAnimation.from = if (animations) zAnimation.value else z
-        zAnimation.reset()
+        if (animate) {
+            zAnimation.from = zAnimation.value
+            zAnimation.reset()
+        } else {
+            zAnimation.finishNow()
+        }
 
         if (!BehindYouConfig.Fov.enabled) return
 
         fovAnimation.to = fov
-        fovAnimation.from = if (animations) fovAnimation.value else fov
-        fovAnimation.reset()
+        if (animate) {
+            fovAnimation.from = fovAnimation.value
+            fovAnimation.reset()
+        } else {
+            fovAnimation.finishNow()
+        }
     }
 
     private fun setupAnimations() {

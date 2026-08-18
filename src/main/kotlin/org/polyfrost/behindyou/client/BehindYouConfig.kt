@@ -6,6 +6,7 @@ import org.lwjgl.glfw.GLFW
 import org.polyfrost.behindyou.BehindYouConstants
 import org.polyfrost.oneconfig.api.config.v1.Config
 import org.polyfrost.oneconfig.api.config.v1.annotations.Accordion
+import org.polyfrost.oneconfig.api.config.v1.annotations.Dropdown
 import org.polyfrost.oneconfig.api.config.v1.annotations.Include
 import org.polyfrost.oneconfig.api.config.v1.annotations.Keybind
 import org.polyfrost.oneconfig.api.config.v1.annotations.RadioButton
@@ -79,6 +80,12 @@ object BehindYouConfig : Config(
 
         @Slider(title = "Animation Time (secs)", min = 0.1f, max = 2f, step = 0.1f)
         var speed = 0.4f
+
+        @Dropdown(title = "Back View Animation", options = ["Never", "When Entering Back View", "When Returning to First Person", "Always"])
+        var back = AnimationMode.Both
+
+        @Dropdown(title = "Front View Animation", options = ["Never", "When Entering Front View", "When Returning to First Person", "Always"])
+        var front = AnimationMode.Both
     }
 
     @Accordion(title = "FOV Settings", description = "Modify your field of view", subcategory = "Camera Settings", index = 2)
@@ -116,6 +123,8 @@ object BehindYouConfig : Config(
             "Keybinds.frontKeybindHandleMode",
             "Keybinds.enableF5",
             "Animation.speed",
+            "Animation.back",
+            "Animation.front",
             "Fov.back",
             "Fov.front",
             "Distance.back",
@@ -125,6 +134,8 @@ object BehindYouConfig : Config(
         }
 
         addDependency("Animation.speed", "Animation.enabled")
+        addDependency("Animation.back", "Animation.enabled")
+        addDependency("Animation.front", "Animation.enabled")
         addCallback("Animation.speed") { value: Float ->
             BehindYouClient.modifyAnimations(value.seconds)
             false
