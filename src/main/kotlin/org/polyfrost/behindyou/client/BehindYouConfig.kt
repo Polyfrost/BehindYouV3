@@ -18,7 +18,7 @@ import org.polyfrost.oneconfig.api.ui.v1.keybind.KeybindManager
 object BehindYouConfig : Config(
     BehindYouConstants.CONFIG_ID,
     "/assets/behindyouv3/behindyou_dark.svg",
-    BehindYouConstants.NAME,
+    BehindYouConstants.DISPLAY_NAME,
     Category.QOL
 ) {
     private val minecraft: Minecraft
@@ -110,6 +110,9 @@ object BehindYouConfig : Config(
     }
 
     init {
+        addAliases(*arrayOf(BehindYouConstants.ALIAS, "Snap Look"))
+        getProperty("isEnabled").addMetadata("searchTags", listOf(BehindYouConstants.ALIAS, "Snap Look"))
+
         addCallback("isEnabled") { value: Boolean ->
             if (!value) BehindYouClient.stopManagingPerspective()
             false

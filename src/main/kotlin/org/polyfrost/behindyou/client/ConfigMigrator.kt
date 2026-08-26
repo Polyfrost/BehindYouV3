@@ -70,7 +70,7 @@ object ConfigMigrator {
             if (version <= notified || version > CURRENT_SCHEMA_VERSION) continue
             val (type, message) = notice
             Notifications.send(
-                BehindYouConstants.NAME,
+                BehindYouConstants.DISPLAY_NAME,
                 message,
                 type,
                 duration = 10_000f,

@@ -6,5 +6,9 @@ object BehindYouConstants {
     const val NAME = "@MOD_NAME@"
     const val VERSION = "@MOD_VERSION@"
 
+    const val ALIAS = "SnapLook"
+
+    const val DISPLAY_NAME = "BehindYou ($ALIAS)"
+
     const val CONFIG_ID = "$ID.json"
 }
