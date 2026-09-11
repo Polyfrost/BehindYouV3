@@ -16,6 +16,7 @@ val mcversion: String = sc.current.version
 val versionrange: String = sc.properties["mod.mc_compat"]
 val loaderversion: String = sc.properties["deps.fabric_loader"]
 val oneconfigversion: String = sc.properties["deps.oneconfig"]
+val fabricLanguageKotlinVersion: String = sc.properties["deps.fabric_language_kotlin"]
 
 version = "$modversion+$mcversion"
 base.archivesName = modid
@@ -57,7 +58,13 @@ dependencies {
     loomx.applyMojangMappings()
 
     modImplementation("net.fabricmc:fabric-loader:$loaderversion")
-    modImplementation("org.polyfrost.oneconfig:$mcversion-fabric:$oneconfigversion")
+    modImplementation("org.polyfrost.oneconfig:$mcversion-fabric:$oneconfigversion") {
+        // Loom strips the nested Kotlin jars from a remapped copy, so the plain copy below must stay the only candidate
+        exclude(group = "net.fabricmc", module = "fabric-language-kotlin")
+    }
+    // This is a library, not a traditional mod. It must not use modRuntimeOnly,
+    // or it does not get properly loaded into the test environment on 1.21.x.
+    runtimeOnly("net.fabricmc:fabric-language-kotlin:$fabricLanguageKotlinVersion")
 
     testImplementation("org.junit.jupiter:junit-jupiter:${sc.properties.get<String>("deps.junit")}")
     testImplementation("net.fabricmc:fabric-loader-junit:$loaderversion")
