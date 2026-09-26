@@ -2,7 +2,6 @@ package org.polyfrost.behindyou.client
 
 import net.minecraft.client.CameraType
 import net.minecraft.client.Minecraft
-import org.lwjgl.glfw.GLFW
 import org.polyfrost.behindyou.BehindYouConstants
 import org.polyfrost.oneconfig.api.config.v1.Config
 import org.polyfrost.oneconfig.api.config.v1.annotations.Accordion
@@ -38,7 +37,7 @@ object BehindYouConfig : Config(
     @Accordion(title = "Keybinds", subcategory = "Keybind Settings", index = 0)
     object Keybinds {
         @Keybind(title = "Back View Keybind")
-        var backKeybind = KeybindHelper.builder().key(GLFW.GLFW_KEY_UNKNOWN).action { isDown ->
+        var backKeybind = KeybindHelper.builder().action { isDown ->
             if (!isEnabled || backKeybindHandleMode == KeybindHandleMode.Toggle && !isDown) return@action false
 
             val perspective = when {
@@ -54,7 +53,7 @@ object BehindYouConfig : Config(
         var backKeybindHandleMode = KeybindHandleMode.Hold
 
         @Keybind(title = "Front View Keybind")
-        var frontKeybind = KeybindHelper.builder().key(GLFW.GLFW_KEY_UNKNOWN).action { isDown ->
+        var frontKeybind = KeybindHelper.builder().action { isDown ->
             if (!isEnabled || frontKeybindHandleMode == KeybindHandleMode.Toggle && !isDown) return@action false
 
             val perspective = when {

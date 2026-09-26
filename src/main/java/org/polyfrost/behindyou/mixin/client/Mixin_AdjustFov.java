@@ -5,16 +5,19 @@ import net.minecraft.client.Minecraft;
 //? if >= 26 {
 import net.minecraft.client.Camera;
 //?} else
-import net.minecraft.client.renderer.GameRenderer;
+//import net.minecraft.client.renderer.GameRenderer;
 import org.polyfrost.behindyou.client.BehindYouClient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 //~ if < 26 'Camera' -> 'GameRenderer'
-@Mixin(GameRenderer.class)
+@Mixin(Camera.class)
 public class Mixin_AdjustFov {
+    //? if > 1.8.9 {
     //~ if < 26 'calculateFov' -> 'getFov'
-    @ModifyExpressionValue(method = "getFov", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(FFF)F", ordinal = 0))
+    @ModifyExpressionValue(method = "calculateFov", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(FFF)F", ordinal = 0))
+    //?} else
+    //@ModifyExpressionValue(method = "getFov", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;fov:F"))
     private float adjustFov(float original) {
         int fov = Minecraft.getInstance().options.fov().get();
         return original * BehindYouClient.getFov(fov) / fov;
