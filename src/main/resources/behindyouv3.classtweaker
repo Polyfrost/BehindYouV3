@@ -1,0 +1,3 @@
+classTweaker v1 named
+
+inject-interface net/minecraft/client/Options org/polyfrost/behindyou/client/compat/OptionsCompat
