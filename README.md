@@ -5,10 +5,16 @@
 
 BehindYou adds a keybind to look behind you and another to look at your own face, both in third person. You might know it as SnapLook.
 
+![Both views](.github/images/views.gif)
+
 - Hold or toggle mode for each key
 - Animated camera movement with adjustable speed
 - Custom FOV and camera distance for each view
 - Optionally use the same animation, FOV and distance for the vanilla perspective key
+
+![Settings](.github/images/settings.gif)
+
+![Setting a keybind](.github/images/keybind.gif)
 
 ## Supported versions
 
