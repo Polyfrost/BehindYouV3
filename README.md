@@ -1,20 +1,29 @@
-<img align="right" src="src/main/resources/behindyou_dark.svg" alt="PolyHitbox Icon"/>
+# BehindYou
 
-# BehindYouV3
+[![Modrinth downloads](https://img.shields.io/modrinth/dt/sAFPANmp?style=flat&logo=modrinth&label=Modrinth&color=1bd96a)](https://modrinth.com/mod/behindyou)
+[![CurseForge downloads](https://img.shields.io/curseforge/dt/1147770?style=flat&logo=curseforge&label=CurseForge&color=f16436)](https://www.curseforge.com/minecraft/mc-mods/behindyou)
 
-![Compact Powered by OneConfig](https://polyfrost.org/img/compact_vector.svg)
-![Dev Workflow Status](https://img.shields.io/github/v/release/Polyfrost/BehindYouV3.svg?style=for-the-badge&color=1452cc&label=release)
+BehindYou adds a keybind to look behind you and another to look at your own face, both in third person. You might know it as SnapLook.
 
-A modern, non-2018 take on the BehindYou mod.
+![Both views](.github/images/views.gif)
 
-## Features
+- Hold or toggle mode for each key
+- Animated camera movement with adjustable speed
+- Custom FOV and camera distance for each view
+- Optionally use the same animation, FOV and distance for the vanilla perspective key
 
-- Frontview & Backview
-- Keybind
-- FOV
-- Animation
+![Settings](.github/images/settings.gif)
 
-## Gallery
+![Setting a keybind](.github/images/keybind.gif)
 
-![settings-page.png](images/settings-page.png)
+## Supported versions
 
+- Minecraft 1.8.9 on Ornithe.
+- Minecraft 1.21.1-26.3 on Fabric.
+
+BehindYou needs [OneConfig](https://modrinth.com/mod/oneconfig) and Fabric Language Kotlin.
+
+## Support
+
+- Report bugs and ask questions on the [Polyfrost Discord](https://polyfrost.org/discord).
+- Check [Polyfrost Status](https://status.polyfrost.org/) if a Polyfrost service is down.
