@@ -2,6 +2,7 @@
     "schemaVersion": 1,
     "id": "${mod_id}",
     "name": "${mod_name}",
+    "icon": "icon.png",
     "version": "${mod_version}",
     "description": "Look behind you with ease!",
     "authors": [
