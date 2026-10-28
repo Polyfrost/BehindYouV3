@@ -4,6 +4,7 @@ import net.minecraft.client.CameraType
 import net.minecraft.client.Minecraft
 import org.polyfrost.oneconfig.api.event.v1.eventHandler
 import org.polyfrost.oneconfig.api.event.v1.events.WorldEvent
+import kotlin.math.abs
 
 object BehindYouClient {
     // blocks from target at which the eased out z animation counts as arrived for first person switching
@@ -47,7 +48,7 @@ object BehindYouClient {
         get() {
             setupAnimations()
             if (zAnimation.isFinished) return true
-            return kotlin.math.abs(zAnimation.value - zAnimation.to) <= ARRIVAL_EPSILON
+            return abs(zAnimation.value - zAnimation.to) <= ARRIVAL_EPSILON
         }
 
     fun initialize() {

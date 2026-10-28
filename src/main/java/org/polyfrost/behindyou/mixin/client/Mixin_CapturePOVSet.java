@@ -7,6 +7,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import org.polyfrost.behindyou.client.BehindYouClient;
 import org.polyfrost.behindyou.client.BehindYouConfig;
+//? if = 1.8.9
+//import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -15,7 +17,7 @@ public class Mixin_CapturePOVSet {
     //? if > 1.8.9 {
     @WrapOperation(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;setCameraType(Lnet/minecraft/client/CameraType;)V"))
     //?} else
-    //@WrapOperation(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;perspective:I", opcode = org.objectweb.asm.Opcodes.PUTFIELD, ordinal = 0))
+    //@WrapOperation(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;perspective:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
     //~ if = 1.8.9 'CameraType arg' -> 'int arg'
     private void capturePOVSetF5(Options instance, CameraType arg, Operation<Void> original) {
         if (BehindYouConfig.INSTANCE.isEnabled() && BehindYouConfig.Keybinds.INSTANCE.getEnableF5()) {
