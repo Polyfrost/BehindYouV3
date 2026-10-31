@@ -154,6 +154,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions.jvmTarget = kotlinJvmTarget
+    finalizedBy("detekt")
 }
 
 bloom {
