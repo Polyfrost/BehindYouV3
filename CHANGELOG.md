@@ -1,3 +1,2 @@
-## 3.5.0
-- Added SnapLook as an alias for BehindYou
-- Added support for Minecraft 26.3
+## 3.5.1
+- Fix view not refreshing after perspective switch on 1.8
