@@ -25,6 +25,8 @@ object BehindYouClient {
     private lateinit var fovAnimation: Animation
     private var managedPerspective: CameraType? = null
 
+    private var viewRefreshPending = false
+
     @JvmStatic val isManagingPerspective: Boolean
         get() {
             val managed = managedPerspective ?: return false
@@ -47,9 +49,18 @@ object BehindYouClient {
     @JvmStatic val isFinished: Boolean
         get() {
             setupAnimations()
-            if (zAnimation.isFinished) return true
-            return abs(zAnimation.value - zAnimation.to) <= ARRIVAL_EPSILON
+            val finished = zAnimation.isFinished || abs(zAnimation.value - zAnimation.to) <= ARRIVAL_EPSILON
+            if (finished && viewRefreshPending) {
+                refreshView(BehindYouConfig.Fov.enabled && !fovAnimation.isFinished && fovAnimation.value != fovAnimation.to)
+            }
+            return finished
         }
+
+    private fun refreshView(stillPending: Boolean = false) {
+        viewRefreshPending = stillPending
+        //? if = 1.8.9
+        //minecraft.worldRenderer.onViewChanged()
+    }
 
     fun initialize() {
         ConfigMigrator.migrate()
@@ -62,6 +73,7 @@ object BehindYouClient {
 
     fun stopManagingPerspective() {
         managedPerspective = null
+        if (viewRefreshPending) refreshView()
     }
 
     @JvmStatic
@@ -104,6 +116,7 @@ object BehindYouClient {
             zAnimation.reset()
         }
 
+        viewRefreshPending = animate && perspective == CameraType.FIRST_PERSON
         previousPerspective = currentPerspective
         managedPerspective = perspective
         minecraft.options.setCameraType(perspective)
