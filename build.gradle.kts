@@ -10,7 +10,6 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version "2.4.10"
     id("net.fabricmc.fabric-loom-remap") version "1.19-SNAPSHOT" apply false
     id("ploceus") version "1.17.4" apply false
-    id("dev.deftu.gradle.bloom") version "0.2.0"
     id("me.modmuss50.mod-publish-plugin") version "2.2.0"
     id("dev.detekt") version "2.0.0-alpha.6"
     id("net.ltgt.errorprone") version "5.1.1"
@@ -161,12 +160,6 @@ tasks.withType<KotlinCompile>().configureEach {
     compilerOptions.jvmTarget = kotlinJvmTarget
 }
 
-bloom {
-    replacement("@MOD_ID@", modid)
-    replacement("@MOD_NAME@", modname)
-    replacement("@MOD_VERSION@", modversion)
-}
-
 tasks {
     test {
         useJUnitPlatform()
@@ -193,9 +186,14 @@ tasks {
 
         filesMatching("fabric.mod.json") {
             expand(props)
-            if (!isOrnithe) filter { line -> if ("\"accessWidener\"" in line) "" else line }
         }
-        if (!isOrnithe) exclude("$modid.classtweaker")
+
+        if (!isOrnithe) {
+            filesMatching("fabric.mod.json") {
+                filter { line -> if ("\"accessWidener\"" in line) "" else line }
+            }
+            exclude("$modid.classtweaker")
+        }
     }
 
     jar {

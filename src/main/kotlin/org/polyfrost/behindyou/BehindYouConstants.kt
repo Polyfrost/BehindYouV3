@@ -1,10 +1,7 @@
 package org.polyfrost.behindyou
 
 object BehindYouConstants {
-    // filled in at build time from gradle.properties by the bloom DGT plugin
-    const val ID = "@MOD_ID@"
-    const val NAME = "@MOD_NAME@"
-    const val VERSION = "@MOD_VERSION@"
+    const val ID = "behindyouv3"
 
     const val ALIAS = "SnapLook"
 
